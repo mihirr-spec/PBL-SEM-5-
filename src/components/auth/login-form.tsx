@@ -2,18 +2,28 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Landmark,
+  Loader2,
+  Lock,
+  Mail,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
 import { demoPassword } from "@/lib/data/seed";
 import { cn } from "@/lib/utils";
 
 const DEMO_EMAIL = "mihir.sanghvi@university.edu.in";
 
-/** Translucent control, legible against the frosted card. */
 const control =
-  "h-12 w-full rounded-xl border border-white/70 bg-white/70 pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 transition-colors focus:border-gold-300 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-gold-200";
+  "h-14 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-[3.6rem] pr-4 text-[15px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
+
+const fieldIcon =
+  "pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-ink-800";
 
 export function LoginForm() {
   const { signIn, user, loading } = useSession();
@@ -22,7 +32,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(true);
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,62 +64,70 @@ export function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="mt-7 space-y-3" noValidate>
-        <div className="relative">
-          <Mail
-            className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-stone-400"
-            aria-hidden
-          />
-          <input
-            id="email"
-            type="email"
-            autoComplete="username"
-            aria-label="University email or registration number"
-            placeholder="Email or registration number"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={control}
-            required
-          />
-        </div>
-
-        <div className="relative">
-          <Lock
-            className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-stone-400"
-            aria-hidden
-          />
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            aria-label="Password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={cn(control, "pr-12")}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md p-1.5 text-stone-400 hover:text-stone-600"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+      <form onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
+        <div>
+          <label
+            htmlFor="email"
+            className="mb-2.5 block text-[15px] font-medium text-ink-900"
           >
-            {showPassword ? (
-              <EyeOff className="size-4" />
-            ) : (
-              <Eye className="size-4" />
-            )}
-          </button>
+            University Email / ID
+          </label>
+          <div className="relative">
+            <Mail className={fieldIcon} strokeWidth={1.6} aria-hidden />
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              placeholder="you@university.edu.in"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={control}
+              required
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-stone-600">
+        <div>
+          <label
+            htmlFor="password"
+            className="mb-2.5 block text-[15px] font-medium text-ink-900"
+          >
+            Password
+          </label>
+          <div className="relative">
+            <Lock className={fieldIcon} strokeWidth={1.6} aria-hidden />
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={cn(control, "pr-14")}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute top-1/2 right-3.5 -translate-y-1/2 rounded-md p-1.5 text-ink-800 transition-colors hover:text-azure-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-5" strokeWidth={1.6} />
+              ) : (
+                <Eye className="size-5" strokeWidth={1.6} />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex cursor-pointer items-center gap-3 text-[15px] text-stone-700">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="size-4 cursor-pointer rounded border-stone-400 accent-gold-500"
+              className="size-[18px] cursor-pointer rounded border-ink-400 accent-ink-800"
             />
             Remember me
           </label>
@@ -120,7 +138,7 @@ export function LoginForm() {
                 "Password resets are handled by the academic office in this release.",
               )
             }
-            className="text-[13px] font-medium text-gold-600 hover:underline"
+            className="text-[15px] text-azure-600 hover:underline"
           >
             Forgot password?
           </button>
@@ -129,44 +147,64 @@ export function LoginForm() {
         {error ? (
           <p
             role="alert"
-            className="flex items-start gap-2 rounded-xl bg-clay-100/80 px-3 py-2.5 text-[13px] text-clay-500"
+            className="flex items-start gap-2 rounded-lg bg-clay-100/80 px-3.5 py-3 text-[14px] text-clay-500"
           >
             <AlertCircle className="mt-px size-4 shrink-0" />
             {error}
           </p>
         ) : null}
 
-        <Button
+        <button
           type="submit"
-          size="lg"
-          loading={submitting}
-          className="mt-1 h-12 w-full rounded-xl text-[15px]"
+          disabled={submitting}
+          className="flex h-[3.9rem] w-full items-center justify-center gap-3 rounded-lg bg-[linear-gradient(90deg,#173b7e_0%,#1d4b93_55%,#2f62a6_100%)] text-[18px] font-medium text-white shadow-[0_14px_30px_-18px_rgba(13,31,63,0.95)] transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:pointer-events-none disabled:opacity-70"
         >
-          {submitting ? "Signing in" : "Log in"}
-          {!submitting ? <ArrowRight className="size-4" /> : null}
-        </Button>
+          {submitting ? (
+            <>
+              <Loader2 className="size-5 animate-spin" aria-hidden />
+              Signing in
+            </>
+          ) : (
+            <>
+              Sign In
+              <ArrowRight className="size-5" strokeWidth={1.8} />
+            </>
+          )}
+        </button>
       </form>
 
-      <div className="mt-6 flex items-center gap-3">
-        <span className="h-px flex-1 bg-stone-400/25" />
-        <span className="text-[11px] font-medium tracking-wider text-stone-500">
-          DEMO ACCOUNT
-        </span>
-        <span className="h-px flex-1 bg-stone-400/25" />
+      <div className="mt-8 flex items-center gap-6">
+        <span className="h-px flex-1 bg-[#c9d1dc]" />
+        <span className="text-[13px] tracking-wide text-stone-500">OR</span>
+        <span className="h-px flex-1 bg-[#c9d1dc]" />
       </div>
 
       <button
         type="button"
-        onClick={fillDemo}
-        className="mt-3 w-full rounded-xl border border-white/70 bg-white/55 px-4 py-3 text-center transition-colors hover:bg-white/80"
+        onClick={() =>
+          setError(
+            "University single sign-on arrives in a later release. Sign in with your email and password for now.",
+          )
+        }
+        className="mt-7 flex h-[4.2rem] w-full items-center justify-center gap-3 rounded-lg border border-ink-800/70 bg-white/80 px-4 text-[15px] sm:gap-5 sm:text-[17px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
       >
-        <span className="tnum block text-[12.5px] text-stone-600">
-          {DEMO_EMAIL}
-        </span>
-        <span className="mt-0.5 block text-[12px] font-medium text-gold-600">
-          Tap to fill these in
-        </span>
+        <Landmark className="size-6 shrink-0 text-ink-800 sm:size-7" strokeWidth={1.5} aria-hidden />
+        Continue with University Account
       </button>
+
+      <div className="mt-10 text-center">
+        <p className="text-[15px] text-stone-500">Don&rsquo;t have access?</p>
+        <p className="mt-1.5 text-[16px] text-azure-600">
+          Contact your PBL coordinator
+        </p>
+        <button
+          type="button"
+          onClick={fillDemo}
+          className="mt-5 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
+        >
+          Trying it out? Use the demo account
+        </button>
+      </div>
     </>
   );
 }
