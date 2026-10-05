@@ -1,0 +1,107 @@
+import type { ReactNode } from "react";
+
+import { Art, type ArtKey } from "@/components/layout/art";
+import { cn } from "@/lib/utils";
+
+export function Card({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className={cn(
+        "overflow-hidden rounded-[20px] border border-white/70 bg-white/70 shadow-[0_1px_2px_rgba(61,78,92,0.05),0_20px_50px_-30px_rgba(61,78,92,0.45)] backdrop-blur-xl",
+        className,
+      )}
+    >
+      {children}
+    </section>
+  );
+}
+
+export function CardHeader({
+  title,
+  description,
+  action,
+  className,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-start justify-between gap-3 border-b border-sand-200/60 px-5 py-4",
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        <h2 className="font-display text-[17px] tracking-tight text-ink-900">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-0.5 text-[13px] text-stone-500">{description}</p>
+        ) : null}
+      </div>
+      {action ? <div className="shrink-0">{action}</div> : null}
+    </div>
+  );
+}
+
+export function CardBody({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  return <div className={cn("px-5 py-4", className)}>{children}</div>;
+}
+
+/** Shown in place of a list when there is nothing to display. */
+export function EmptyState({
+  icon,
+  title,
+  description,
+  art = "avenue",
+  className,
+}: {
+  icon?: ReactNode;
+  title: string;
+  description?: string;
+  /** Watercolour vignette shown above the message. */
+  art?: ArtKey;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center px-6 py-10 text-center",
+        className,
+      )}
+    >
+      <div className="relative mb-4">
+        <Art
+          name={art}
+          fade="soft"
+          sizes="220px"
+          className="h-28 w-auto opacity-80"
+        />
+        {icon ? (
+          <div className="absolute -bottom-2 left-1/2 flex size-10 -translate-x-1/2 items-center justify-center rounded-full border border-white/80 bg-white/90 text-azure-600 shadow-[0_8px_20px_-12px_rgba(13,31,63,0.6)]">
+            {icon}
+          </div>
+        ) : null}
+      </div>
+      <p className="font-display text-[16px] text-ink-900">{title}</p>
+      {description ? (
+        <p className="mt-1 max-w-xs text-[13px] text-stone-500">{description}</p>
+      ) : null}
+    </div>
+  );
+}

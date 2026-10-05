@@ -1,26 +1,151 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   PBL Platform — warm light theme
+   Palette sampled from the campus cover photograph: ivory stone,
+   warm sand, muted gold dome, soft sky. No black / blue / purple /
+   green / orange as primary surfaces or accents.
+   ------------------------------------------------------------------ */
+
+@theme {
+  /* Neutrals — warm ivory → stone */
+  --color-ivory-50: #fdfbf7;
+  --color-ivory-100: #faf6ef;
+  --color-ivory-200: #f4ece0;
+  --color-sand-100: #efe4d2;
+  --color-sand-200: #e5d6bf;
+  --color-sand-300: #d8c4a6;
+  --color-stone-400: #a89b88;
+  --color-stone-500: #8a7d6b;
+  --color-stone-600: #6b6153;
+  --color-stone-700: #4e463b;
+  --color-stone-800: #35302a;
+
+  /* Accent — muted gold from the dome */
+  --color-gold-50: #fdf6e6;
+  --color-gold-100: #f9e9c4;
+  --color-gold-200: #f0d593;
+  --color-gold-300: #e3bd62;
+  --color-gold-400: #d2a63f;
+  --color-gold-500: #b88a2c;
+  --color-gold-600: #946d22;
+
+  /* Watercolour wash — sampled from the campus illustration, used only as
+     the landing/auth backdrop so it blends with the artwork's own sky. */
+  --color-wash-sky: #b9e0f0;
+  --color-wash-mid: #cce6f0;
+  --color-wash-low: #eef4f2;
+  --color-wash-snow: #fcfcf9;
+
+  /* Ink — deep navy display type and the azure accent word, sampled from
+     the landing artwork's signage blue. Used by the marketing surfaces only. */
+  --color-ink-900: #0d1f3f;
+  --color-ink-800: #12294f;
+  --color-ink-700: #1b3a6b;
+  --color-ink-400: #5b6d8c;
+  --color-azure-600: #1550c8;
+  --color-azure-500: #1f63e0;
+  --color-azure-100: #dbe7fb;
+  --color-azure-50: #eef4fe;
+
+  /* Numeral tints for the numbered feature rows */
+  --color-numeral-blue: #cddff5;
+  --color-numeral-peach: #fae2c4;
+  --color-numeral-sage: #d8e8d6;
+  --color-numeral-lilac: #ddd6ef;
+
+  /* Status tints — kept soft and warm-leaning */
+  --color-clay-100: #f7dfd7;
+  --color-clay-500: #b4614a;
+  --color-sage-100: #e2e8d9;
+  --color-sage-500: #6f8156;
+  --color-sky-100: #dde8ee;
+  --color-sky-500: #5a7f93;
+  --color-plum-100: #eddfe3;
+  --color-plum-500: #8e6271;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+
+  --radius-card: 14px;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ivory-100);
+  color: var(--color-stone-800);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures for dates, counts, marks and percentages */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+::selection {
+  background-color: var(--color-gold-100);
+  color: var(--color-stone-800);
+}
+
+/* Focus ring — consistent across every interactive element */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Scrollbars inside scroll regions */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sand-300) transparent;
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-rise {
+  animation: fade-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Slow drift for the watercolour sketches in page banners */
+@keyframes art-drift {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+.animate-art-drift {
+  animation: art-drift 9s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
