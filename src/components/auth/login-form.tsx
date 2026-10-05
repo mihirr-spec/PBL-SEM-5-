@@ -186,7 +186,7 @@ export function LoginForm() {
             "University single sign-on arrives in a later release. Sign in with your email and password for now.",
           )
         }
-        className="mt-7 flex h-[4.2rem] w-full items-center justify-center gap-3 rounded-lg border border-ink-800/70 bg-white/80 px-4 text-[15px] sm:gap-5 sm:text-[17px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
+        className="mt-7 flex h-[4.2rem] w-full items-center justify-center gap-2.5 rounded-lg border border-ink-800/70 bg-white px-3 text-[14px] whitespace-nowrap sm:gap-5 sm:text-[17px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
       >
         <Landmark className="size-6 shrink-0 text-ink-800 sm:size-7" strokeWidth={1.5} aria-hidden />
         Continue with University Account

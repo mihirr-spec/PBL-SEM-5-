@@ -8,40 +8,26 @@ import { LoginForm } from "@/components/auth/login-form";
 export const metadata: Metadata = { title: "Sign in" };
 
 /**
- * Split sign-in screen: the form on clean paper to the left, the campus
- * watercolour bleeding in from the right. Below lg the painting drops behind
- * the form as a faint wash so the page still reads as one piece.
+ * Sign-in screen over a single full-bleed watercolour. The painting leaves
+ * its left side as open paper, so on wide screens the form sits directly on
+ * it; on narrow screens the campus moves behind a frosted card.
  */
 export default function LoginPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#fbfcfd]">
-      {/* ------------------------------ artwork ------------------------------ */}
-      <div
-        className="absolute inset-0 -z-10 lg:left-[44%]"
-        aria-hidden
-      >
-        <Image
-          src="/art/login-campus.webp"
-          alt=""
-          fill
-          priority
-          sizes="(max-width: 1024px) 100vw, 56vw"
-          className="object-cover object-[center_bottom] opacity-25 lg:object-[left_bottom] lg:opacity-100 lg:[mask-image:linear-gradient(to_right,transparent_0%,black_22%)]"
-        />
-      </div>
-      {/* Soft sky haze behind the form, as in the painting's own wash */}
-      <div
-        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_0%_40%,rgba(185,224,240,0.35),transparent_55%)] lg:hidden"
-        aria-hidden
-      />
-
       <Image
-        src="/art/login-doodles.webp"
+        src="/art/login-bg.webp"
         alt=""
         aria-hidden
-        width={310}
-        height={344}
-        className="pointer-events-none absolute bottom-0 left-0 -z-10 hidden w-[15rem] mix-blend-multiply [mask-image:radial-gradient(ellipse_at_bottom_left,black_55%,transparent_80%)] sm:block xl:w-[19rem]"
+        fill
+        priority
+        sizes="100vw"
+        className="-z-10 object-cover object-[72%_bottom] lg:object-[right_bottom]"
+      />
+      {/* Paper-white haze so the trees never run under the form */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 hidden bg-[radial-gradient(ellipse_48%_70%_at_24%_55%,rgba(253,253,251,0.92)_0%,rgba(253,253,251,0.7)_55%,transparent_100%)] lg:block"
       />
 
       {/* ------------------------------- header ------------------------------ */}
@@ -54,12 +40,12 @@ export default function LoginPage() {
 
       {/* -------------------------------- form ------------------------------- */}
       <main className="flex flex-1 items-center px-6 pt-10 pb-16 sm:px-12 lg:px-[11.5%] lg:pt-0">
-        <div className="animate-fade-rise w-full max-w-[32.5rem] rounded-[24px] bg-white/80 p-6 shadow-[0_24px_70px_-34px_rgba(61,78,92,0.45)] backdrop-blur-md sm:p-8 lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+        <div className="animate-fade-rise w-full max-w-[32.5rem] rounded-[24px] border border-white/70 bg-white/80 p-6 shadow-[0_24px_70px_-34px_rgba(61,78,92,0.45)] backdrop-blur-md sm:p-8 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
           <h1 className="font-display text-[2.9rem] leading-[1.02] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[4.1rem]">
             Welcome <span className="text-azure-600">back</span>
           </h1>
           <p className="mt-4 text-[17px] text-stone-600 sm:text-[19px]">
-            Sign in to your PBL workspace.
+            Sign in with your university email and password.
           </p>
 
           <LoginForm />
