@@ -50,7 +50,7 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 const control =
-  "h-12 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-12 pr-4 text-[14.5px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
+  "h-11 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-12 pr-4 text-[14.5px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
 
 const fieldIcon =
   "pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-ink-800";
@@ -108,7 +108,7 @@ export function LoginForm() {
       <div
         role="tablist"
         aria-label="Account type"
-        className="mt-6 grid grid-cols-3 gap-1 rounded-xl bg-ink-900/[0.06] p-1"
+        className="mt-5 grid grid-cols-3 gap-1 rounded-xl bg-ink-900/[0.06] p-1"
       >
         {TABS.map((t) => (
           <button
@@ -129,11 +129,11 @@ export function LoginForm() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
+      <form onSubmit={handleSubmit} className="mt-4 space-y-3.5" noValidate>
         <div>
           <label
             htmlFor="email"
-            className="mb-2 block text-[14px] font-medium text-ink-900"
+            className="mb-1.5 block text-[14px] font-medium text-ink-900"
           >
             University Email / ID
           </label>
@@ -155,7 +155,7 @@ export function LoginForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-2 block text-[14px] font-medium text-ink-900"
+            className="mb-1.5 block text-[14px] font-medium text-ink-900"
           >
             Password
           </label>
@@ -222,7 +222,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg bg-[linear-gradient(90deg,#173b7e_0%,#1d4b93_55%,#2f62a6_100%)] text-[16px] font-medium text-white shadow-[0_14px_30px_-18px_rgba(13,31,63,0.95)] transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:pointer-events-none disabled:opacity-70"
+          className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg bg-[linear-gradient(90deg,#173b7e_0%,#1d4b93_55%,#2f62a6_100%)] text-[16px] font-medium text-white shadow-[0_14px_30px_-18px_rgba(13,31,63,0.95)] transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:pointer-events-none disabled:opacity-70"
         >
           {submitting ? (
             <>
@@ -238,7 +238,7 @@ export function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 flex items-center gap-5">
+      <div className="mt-4 flex items-center gap-5">
         <span className="h-px flex-1 bg-[#c9d1dc]" />
         <span className="text-[13px] tracking-wide text-stone-500">OR</span>
         <span className="h-px flex-1 bg-[#c9d1dc]" />
@@ -251,21 +251,21 @@ export function LoginForm() {
             "University single sign-on arrives in a later release. Sign in with your email and password for now.",
           )
         }
-        className="mt-5 flex h-12 w-full items-center justify-center gap-2.5 rounded-lg border border-ink-800/70 bg-white px-3 text-[14px] whitespace-nowrap sm:gap-4 sm:text-[15px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
+        className="mt-4 flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-ink-800/70 bg-white px-3 text-[14px] whitespace-nowrap sm:gap-4 sm:text-[15px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
       >
         <Landmark className="size-5 shrink-0 text-ink-800 sm:size-6" strokeWidth={1.5} aria-hidden />
         Continue with University Account
       </button>
 
-      <div className="mt-6 text-center">
-        <p className="text-[13.5px] text-stone-500">Don&rsquo;t have access?</p>
-        <p className="mt-1 text-[14.5px] text-azure-600">
-          Contact your PBL coordinator
+      <div className="mt-4 text-center">
+        <p className="text-[13.5px] text-stone-500">
+          Don&rsquo;t have access?{" "}
+          <span className="text-azure-600">Contact your PBL coordinator</span>
         </p>
         <button
           type="button"
           onClick={fillDemo}
-          className="mt-4 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
+          className="mt-3 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
         >
           Trying it out? Use the demo {tab.label.toLowerCase()} account
         </button>
