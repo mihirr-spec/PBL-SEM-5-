@@ -89,7 +89,7 @@ export interface Group {
   members: GroupMember[];
 }
 
-export type RequestStatus = "pending" | "approved" | "rejected" | "closed";
+export type RequestStatus = "pending" | "changes_requested" | "approved" | "rejected" | "closed";
 
 export interface MentorRequest {
   id: string;
@@ -98,7 +98,13 @@ export interface MentorRequest {
   facultyName: string;
   message: string;
   status: RequestStatus;
+  /** The signed PBL form, in the submissions bucket. */
+  formPath?: string;
+  formName?: string;
+  /** The teacher's note: what to change, or why it was rejected. */
+  reviewNote: string;
   createdAt: string;
+  resubmittedAt?: string;
   decidedAt?: string;
 }
 

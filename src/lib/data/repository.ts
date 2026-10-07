@@ -402,11 +402,21 @@ export async function listRequestsForGroup(groupId: string): Promise<MentorReque
     groupId: r.group_id,
     facultyId: r.faculty_id,
     facultyName: r.faculty?.full_name ?? "",
+    ...requestFields(r),
+  }));
+}
+
+function requestFields(r: any) {
+  return {
     message: r.message,
     status: r.status,
+    formPath: r.form_path ?? undefined,
+    formName: r.form_name ?? undefined,
+    reviewNote: r.review_note ?? "",
     createdAt: r.created_at,
+    resubmittedAt: r.resubmitted_at ?? undefined,
     decidedAt: r.decided_at ?? undefined,
-  }));
+  };
 }
 
 /** Requests sent to one teacher, each with the requesting group's details. */
@@ -424,24 +434,58 @@ export async function listRequestsForFaculty(
     groupId: r.group_id,
     facultyId: r.faculty_id,
     facultyName: "",
-    message: r.message,
-    status: r.status,
-    createdAt: r.created_at,
-    decidedAt: r.decided_at ?? undefined,
+    ...requestFields(r),
     group: r.groups ? toGroup(r.groups) : null,
   }));
 }
 
-export async function requestMentor(facultyId: string, message: string): Promise<void> {
-  const { error } = await supabase.rpc("request_mentor", { p_faculty_id: facultyId, p_message: message });
+async function uploadMentorForm(groupId: string, file: File) {
+  const path = `${groupId}/mentor-form/${Date.now()}-${safeFileName(file.name)}`;
+  const upload = await supabase.storage.from("submissions").upload(path, file, { contentType: file.type });
+  fail(upload.error);
+  return { p_form_path: path, p_form_name: file.name };
+}
+
+/** Team lead only: sends the signed PBL form to the agreed teacher. */
+export async function requestMentor(input: {
+  groupId: string;
+  facultyId: string;
+  message: string;
+  form: File;
+}): Promise<void> {
+  const form = await uploadMentorForm(input.groupId, input.form);
+  const { error } = await supabase.rpc("request_mentor", {
+    p_faculty_id: input.facultyId,
+    p_message: input.message,
+    ...form,
+  });
   fail(error);
 }
 
-/** Returns "approved", "rejected", "already_assigned" or "full". */
-export async function decideMentorRequest(requestId: string, approve: boolean): Promise<string> {
-  const { data, error } = await supabase.rpc("decide_mentor_request", {
+/** Team lead only: sends a corrected form after the teacher asked for changes. */
+export async function resubmitMentorRequest(input: {
+  requestId: string;
+  groupId: string;
+  message: string;
+  form: File;
+}): Promise<void> {
+  const form = await uploadMentorForm(input.groupId, input.form);
+  const { error } = await supabase.rpc("resubmit_mentor_request", {
+    p_request: input.requestId,
+    p_message: input.message,
+    ...form,
+  });
+  fail(error);
+}
+
+export type MentorDecision = "approve" | "reject" | "changes";
+
+/** Returns "approved", "rejected", "changes_requested", "already_assigned" or "full". */
+export async function reviewMentorRequest(requestId: string, decision: MentorDecision, note: string): Promise<string> {
+  const { data, error } = await supabase.rpc("review_mentor_request", {
     p_request: requestId,
-    p_approve: approve,
+    p_decision: decision,
+    p_note: note,
   });
   fail(error);
   return data as string;
