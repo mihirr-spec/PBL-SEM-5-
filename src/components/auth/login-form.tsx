@@ -20,10 +20,10 @@ import { cn } from "@/lib/utils";
 const DEMO_EMAIL = "mihir.sanghvi@university.edu.in";
 
 const control =
-  "h-14 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-[3.6rem] pr-4 text-[15px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
+  "h-12 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-12 pr-4 text-[14.5px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
 
 const fieldIcon =
-  "pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-ink-800";
+  "pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-ink-800";
 
 export function LoginForm() {
   const { signIn, user, loading } = useSession();
@@ -64,11 +64,11 @@ export function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
+      <form onSubmit={handleSubmit} className="mt-7 space-y-4" noValidate>
         <div>
           <label
             htmlFor="email"
-            className="mb-2.5 block text-[15px] font-medium text-ink-900"
+            className="mb-2 block text-[14px] font-medium text-ink-900"
           >
             University Email / ID
           </label>
@@ -90,7 +90,7 @@ export function LoginForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-2.5 block text-[15px] font-medium text-ink-900"
+            className="mb-2 block text-[14px] font-medium text-ink-900"
           >
             Password
           </label>
@@ -122,12 +122,12 @@ export function LoginForm() {
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <label className="flex cursor-pointer items-center gap-3 text-[15px] text-stone-700">
+          <label className="flex cursor-pointer items-center gap-2.5 text-[14px] text-stone-700">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="size-[18px] cursor-pointer rounded border-ink-400 accent-ink-800"
+              className="size-4 cursor-pointer rounded border-ink-400 accent-ink-800"
             />
             Remember me
           </label>
@@ -138,7 +138,7 @@ export function LoginForm() {
                 "Password resets are handled by the academic office in this release.",
               )
             }
-            className="text-[15px] text-azure-600 hover:underline"
+            className="text-[14px] text-azure-600 hover:underline"
           >
             Forgot password?
           </button>
@@ -157,23 +157,23 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="flex h-[3.9rem] w-full items-center justify-center gap-3 rounded-lg bg-[linear-gradient(90deg,#173b7e_0%,#1d4b93_55%,#2f62a6_100%)] text-[18px] font-medium text-white shadow-[0_14px_30px_-18px_rgba(13,31,63,0.95)] transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:pointer-events-none disabled:opacity-70"
+          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg bg-[linear-gradient(90deg,#173b7e_0%,#1d4b93_55%,#2f62a6_100%)] text-[16px] font-medium text-white shadow-[0_14px_30px_-18px_rgba(13,31,63,0.95)] transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:pointer-events-none disabled:opacity-70"
         >
           {submitting ? (
             <>
-              <Loader2 className="size-5 animate-spin" aria-hidden />
+              <Loader2 className="size-[18px] animate-spin" aria-hidden />
               Signing in
             </>
           ) : (
             <>
               Sign In
-              <ArrowRight className="size-5" strokeWidth={1.8} />
+              <ArrowRight className="size-[18px]" strokeWidth={1.8} />
             </>
           )}
         </button>
       </form>
 
-      <div className="mt-8 flex items-center gap-6">
+      <div className="mt-6 flex items-center gap-5">
         <span className="h-px flex-1 bg-[#c9d1dc]" />
         <span className="text-[13px] tracking-wide text-stone-500">OR</span>
         <span className="h-px flex-1 bg-[#c9d1dc]" />
@@ -186,21 +186,21 @@ export function LoginForm() {
             "University single sign-on arrives in a later release. Sign in with your email and password for now.",
           )
         }
-        className="mt-7 flex h-[4.2rem] w-full items-center justify-center gap-2.5 rounded-lg border border-ink-800/70 bg-white px-3 text-[14px] whitespace-nowrap sm:gap-5 sm:text-[17px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
+        className="mt-5 flex h-12 w-full items-center justify-center gap-2.5 rounded-lg border border-ink-800/70 bg-white px-3 text-[14px] whitespace-nowrap sm:gap-4 sm:text-[15px] font-medium text-ink-900 transition-colors hover:bg-azure-50"
       >
-        <Landmark className="size-6 shrink-0 text-ink-800 sm:size-7" strokeWidth={1.5} aria-hidden />
+        <Landmark className="size-5 shrink-0 text-ink-800 sm:size-6" strokeWidth={1.5} aria-hidden />
         Continue with University Account
       </button>
 
-      <div className="mt-10 text-center">
-        <p className="text-[15px] text-stone-500">Don&rsquo;t have access?</p>
-        <p className="mt-1.5 text-[16px] text-azure-600">
+      <div className="mt-6 text-center">
+        <p className="text-[13.5px] text-stone-500">Don&rsquo;t have access?</p>
+        <p className="mt-1 text-[14.5px] text-azure-600">
           Contact your PBL coordinator
         </p>
         <button
           type="button"
           onClick={fillDemo}
-          className="mt-5 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
+          className="mt-4 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
         >
           Trying it out? Use the demo account
         </button>

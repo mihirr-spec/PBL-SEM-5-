@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Desktop windows wide enough that a landscape painting leaves open space
+   beside the content (used by the sign-in screen). */
+@custom-variant wide (@media (min-width: 1024px) and (min-aspect-ratio: 4/3));
+
 /* ------------------------------------------------------------------
    PBL Platform — warm light theme
    Palette sampled from the campus cover photograph: ivory stone,
