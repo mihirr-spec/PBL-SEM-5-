@@ -1,7 +1,11 @@
+import Image from "next/image";
 import {
   ArrowRight,
   Award,
+  Bell,
   Building2,
+  CheckCircle2,
+  FileSignature,
   FolderKanban,
   GraduationCap,
   LineChart,
@@ -11,10 +15,8 @@ import {
 
 import { Brand } from "@/components/layout/brand";
 import { CampusAccent } from "@/components/layout/campus-accent";
-import { CampusBackdrop } from "@/components/layout/campus-backdrop";
 import { Doodle, type DoodleKey } from "@/components/layout/doodle";
 import { ButtonLink } from "@/components/ui/button";
-import { GlassCard } from "@/components/ui/glass-card";
 import { cn } from "@/lib/utils";
 
 /** Numbered core features — rows alternate side, as in a printed spread. */
@@ -52,23 +54,23 @@ const FEATURES = [
 const STEPS: ReadonlyArray<{ doodle: DoodleKey; title: string; body: string }> = [
   {
     doodle: "bulb",
-    title: "Form / Join Project",
-    body: "Create or join a project and form your team.",
+    title: "Form your group",
+    body: "The team lead creates the group and adds classmates by registration number.",
   },
   {
     doodle: "triangle",
-    title: "Plan & Track",
-    body: "Set milestones, track progress and manage deadlines.",
+    title: "Register your mentor",
+    body: "Upload the PBL form your teacher signed. They approve it, or ask for corrections.",
   },
   {
     doodle: "globe",
-    title: "Collaborate",
-    body: "Work with your team, mentors and faculty.",
+    title: "Report every week",
+    body: "Submit one weekly report for the group. Raise a ticket whenever you are stuck.",
   },
   {
     doodle: "book",
-    title: "Submit & Get Evaluated",
-    body: "Submit your work, receive feedback and complete your PBL.",
+    title: "Get graded",
+    body: "Your mentor grades each report and each student, with notes on what to improve.",
   },
 ];
 
@@ -91,11 +93,11 @@ const AUDIENCES = [
 ] as const;
 
 const ROADMAP = [
-  { tag: "V1", label: "Student portal", note: "Shipping now", live: true },
-  { tag: "V1.1", label: "Weekly progress, evidence & feedback", live: false },
-  { tag: "V2", label: "Faculty portal — review, verification, marks", live: false },
-  { tag: "V2.5", label: "Supervisor — allocation, monitoring, reports", live: false },
-  { tag: "V3", label: "Project health & early-warning analytics", live: false },
+  { tag: "V1", label: "Student, teacher and PBL office portals", note: "Live", live: true },
+  { tag: "V1.1", label: "University single sign-on", live: false },
+  { tag: "V1.2", label: "Portal accounts for every MUJ teacher", live: false },
+  { tag: "V2", label: "Review rubrics and final marks", live: false },
+  { tag: "V3", label: "Project health and early-warning analytics", live: false },
 ] as const;
 
 /** Two-tone uppercase label that opens each marketing section. */
@@ -107,12 +109,52 @@ function Eyebrow({ lead, emphasis }: { lead: string; emphasis: string }) {
   );
 }
 
+/** Floating card on the hero picture: one real moment from the portal. */
+function HeroChip({
+  icon,
+  tone,
+  title,
+  note,
+  className,
+}: {
+  icon: React.ReactNode;
+  tone: string;
+  title: string;
+  note: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "animate-fade-rise absolute flex items-center gap-3 rounded-2xl border border-white/90 bg-white/90 py-2.5 pr-4 pl-2.5 shadow-[0_18px_40px_-22px_rgba(13,31,63,0.55)] backdrop-blur-md",
+        className,
+      )}
+    >
+      <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tone)} aria-hidden>
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[13px] font-semibold whitespace-nowrap text-ink-900">{title}</span>
+        <span className="block text-[11.5px] whitespace-nowrap text-stone-500">{note}</span>
+      </span>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="bg-ivory-100">
       {/* ------------------------------ hero ----------------------------- */}
-      <section className="relative isolate flex min-h-screen flex-col overflow-x-clip">
-        <CampusBackdrop priority />
+      <section className="relative isolate flex min-h-dvh flex-col overflow-x-clip">
+        {/* Sky wash, the same one the portal pages sit on */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,var(--color-wash-sky)_0%,var(--color-wash-mid)_40%,var(--color-wash-low)_75%,var(--color-ivory-100)_100%)]"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 opacity-70 [background-image:radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.95),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.6),transparent_35%)]"
+        />
 
         <header className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
           <Brand href="/" />
@@ -127,46 +169,101 @@ export default function LandingPage() {
           </ButtonLink>
         </header>
 
-        <div className="mx-auto flex w-full max-w-7xl flex-1 items-center px-5 pb-16 sm:px-8">
-          <div className="mx-auto w-full min-w-0 max-w-[30rem] lg:mx-0 lg:ml-auto lg:mr-6">
-            <GlassCard className="animate-fade-rise">
-              <Eyebrow lead="Version 1 ·" emphasis="Student Portal" />
+        <div className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-5 pt-4 pb-16 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-12">
+          {/* --- words --- */}
+          <div className="animate-fade-rise max-w-xl">
+            <Eyebrow lead="Project-Based Learning ·" emphasis="Semester 5" />
 
-              <h1 className="mt-3 font-display text-[2.1rem] leading-[1.1] tracking-tight text-ink-900 sm:text-[2.6rem]">
-                The complete PBL lifecycle,
-                <span className="block text-azure-600">in one place.</span>
-              </h1>
+            <h1 className="mt-4 font-display text-[2.5rem] leading-[1.04] tracking-tight text-ink-900 sm:text-[3.4rem] xl:text-[3.9rem]">
+              Every PBL project,
+              <span className="block text-azure-600">from first idea to final grade.</span>
+            </h1>
 
-              <p className="mt-4 text-[14.5px] leading-relaxed text-stone-600">
-                Project-Based Learning runs on scattered documents, forwarded
-                messages and last-minute reminders. This platform gives
-                students, coordinators and supervisors a single, shared record
-                of every project.
-              </p>
+            <p className="mt-5 max-w-lg text-[15.5px] leading-relaxed text-stone-600">
+              Form your team, register your mentor with the signed PBL form,
+              submit weekly reports and see your grades — with your mentor and
+              the PBL office on the same page.
+            </p>
 
-              <div className="mt-7 space-y-2.5">
-                <ButtonLink
-                  href="/login"
-                  size="lg"
-                  className="w-full bg-ink-800 text-white shadow-[0_10px_24px_-14px_rgba(13,31,63,0.9)] hover:bg-ink-700 active:bg-ink-900"
-                >
-                  Enter the student portal
-                  <ArrowRight className="size-4" />
-                </ButtonLink>
-                <ButtonLink
-                  href="#features"
-                  variant="secondary"
-                  size="lg"
-                  className="w-full border-white/70 bg-white/55 backdrop-blur hover:bg-white/80"
-                >
-                  What it does
-                </ButtonLink>
-              </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink
+                href="/login"
+                size="lg"
+                className="bg-ink-800 px-7 text-white shadow-[0_14px_30px_-16px_rgba(13,31,63,0.95)] hover:bg-ink-700 active:bg-ink-900"
+              >
+                Sign in
+                <ArrowRight className="size-4" />
+              </ButtonLink>
+              <ButtonLink
+                href="#how-it-works"
+                variant="secondary"
+                size="lg"
+                className="border-white/70 bg-white/60 px-7 backdrop-blur hover:bg-white/85"
+              >
+                See how it works
+              </ButtonLink>
+            </div>
 
-              <p className="mt-6 border-t border-white/60 pt-4 text-center text-[12px] text-stone-500">
-                A university Project-Based Learning initiative
-              </p>
-            </GlassCard>
+            <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-stone-600">
+              {[
+                { icon: GraduationCap, label: "Students" },
+                { icon: UsersRound, label: "Teachers" },
+                { icon: Building2, label: "PBL office" },
+              ].map(({ icon: Icon, label }) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-white/80 text-azure-600 ring-1 ring-white">
+                    <Icon className="size-3.5" aria-hidden />
+                  </span>
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* --- picture, with a few real moments from the portal --- */}
+          <div className="relative mx-auto w-full max-w-[26rem] lg:mr-4 lg:ml-auto">
+            <Doodle
+              name="cluster"
+              className="absolute -top-10 -right-12 -z-10 hidden w-44 opacity-70 sm:block"
+            />
+            <Doodle
+              name="plane"
+              className="absolute top-1/3 -left-16 hidden w-10 -rotate-12 opacity-70 lg:block"
+            />
+
+            <div className="animate-fade-rise overflow-hidden rounded-[30px] border-[6px] border-white/90 bg-white shadow-[0_40px_90px_-40px_rgba(13,31,63,0.6)]">
+              <Image
+                src="/campus.webp"
+                alt="Watercolour of the university's main building"
+                width={812}
+                height={1024}
+                priority
+                sizes="(max-width: 1024px) 90vw, 420px"
+                className="aspect-[4/4.6] w-full object-cover object-[center_35%]"
+              />
+            </div>
+
+            <HeroChip
+              className="left-3 top-10 sm:-left-14"
+              icon={<FileSignature className="size-4" />}
+              tone="bg-azure-50 text-azure-600"
+              title="Mentor approved"
+              note="Signed PBL form accepted"
+            />
+            <HeroChip
+              className="right-3 top-[46%] sm:-right-10"
+              icon={<CheckCircle2 className="size-4" />}
+              tone="bg-sage-100 text-sage-500"
+              title="Week 5 report graded"
+              note="9 / 10 · Great field test"
+            />
+            <HeroChip
+              className="left-3 bottom-8 sm:-left-10"
+              icon={<Bell className="size-4" />}
+              tone="bg-gold-50 text-gold-600"
+              title="New from the PBL office"
+              note="Final report template"
+            />
           </div>
         </div>
       </section>
@@ -239,17 +336,20 @@ export default function LandingPage() {
       </section>
 
       {/* ---------------------------- how it works ----------------------- */}
-      <section className="relative isolate overflow-hidden px-5 py-20 text-center sm:px-8">
+      <section
+        id="how-it-works"
+        className="relative isolate scroll-mt-4 overflow-hidden px-5 py-20 text-center sm:px-8"
+      >
         <CampusAccent side="left" art="boulevard" />
 
         <div className="mx-auto max-w-5xl">
           <Eyebrow lead="How it" emphasis="Works" />
           <h2 className="mt-4 font-display text-[2.2rem] leading-[1.1] tracking-tight text-ink-900 sm:text-[2.9rem]">
-            From Idea to Impact — In{" "}
-            <span className="text-azure-600">Simple Steps.</span>
+            Four steps, one{" "}
+            <span className="text-azure-600">semester.</span>
           </h2>
           <p className="mt-4 text-[15px] text-stone-600">
-            A smooth and structured PBL journey for every student.
+            The whole PBL journey, exactly as it runs in the portal.
           </p>
 
           <ol className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
@@ -386,12 +486,14 @@ export default function LandingPage() {
         />
 
         <div className="mx-auto max-w-2xl">
-          <Eyebrow lead="Ready" emphasis="To Get Started?" />
+          <Eyebrow lead="Ready" emphasis="When Your Team Is" />
           <h2 className="mt-4 font-display text-[1.9rem] leading-tight tracking-tight text-ink-900 sm:text-[2.3rem]">
-            Take Your PBL to the Next Level.
+            Your group, your mentor, your progress
+            <span className="block text-azure-600">all in one place.</span>
           </h2>
           <p className="mt-3 text-[14.5px] text-stone-600">
-            Sign in to access your projects, deadlines, submissions and more.
+            Sign in with your university email to form your group, register
+            your mentor and submit this week&rsquo;s report.
           </p>
 
           <ButtonLink
