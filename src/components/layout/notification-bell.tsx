@@ -5,12 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 
 import { NotificationIcon } from "@/components/notifications/notification-icon";
+import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
 import { usePortal } from "@/lib/data/portal-store";
 import { cn, timeAgo } from "@/lib/utils";
 
 export function NotificationBell() {
+  const { user } = useSession();
   const { notifications, unreadCount, markNotificationRead, markAllRead } =
     usePortal();
+  // Students have a full notifications page; staff work from the dropdown.
+  const isStudent = user?.role === "student";
+  const fallbackHref = isStudent ? "/student/notifications" : user ? HOME_BY_ROLE[user.role] : "/";
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +38,7 @@ export function NotificationBell() {
     };
   }, [open]);
 
-  const recent = notifications.slice(0, 5);
+  const recent = notifications.slice(0, isStudent ? 5 : 10);
 
   return (
     <div ref={containerRef} className="relative">
@@ -84,7 +89,7 @@ export function NotificationBell() {
               {recent.map((n) => (
                 <li key={n.id}>
                   <Link
-                    href={n.href ?? "/student/notifications"}
+                    href={n.href ?? fallbackHref}
                     onClick={() => {
                       void markNotificationRead(n.id);
                       setOpen(false);
@@ -120,13 +125,15 @@ export function NotificationBell() {
             </ul>
           )}
 
-          <Link
-            href="/student/notifications"
-            onClick={() => setOpen(false)}
-            className="block border-t border-sand-200 bg-ivory-50 px-4 py-2.5 text-center text-[12.5px] font-medium text-stone-600 hover:bg-ivory-200 hover:text-stone-800"
-          >
-            View all notifications
-          </Link>
+          {isStudent ? (
+            <Link
+              href="/student/notifications"
+              onClick={() => setOpen(false)}
+              className="block border-t border-sand-200 bg-ivory-50 px-4 py-2.5 text-center text-[12.5px] font-medium text-stone-600 hover:bg-ivory-200 hover:text-stone-800"
+            >
+              View all notifications
+            </Link>
+          ) : null}
         </div>
       ) : null}
     </div>

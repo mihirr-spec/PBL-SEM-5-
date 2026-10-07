@@ -42,17 +42,19 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
           {pageLabel}
         </p>
         <p className="truncate text-[11.5px] text-ink-400">
-          {student
-            ? `Semester ${student.semester} · ${student.batch}`
+          {user?.role === "student"
+            ? student
+              ? `Semester ${student.semester} · ${student.batch}`
+              : "Student Portal"
             : user?.role === "admin"
               ? "Administrator Portal"
               : "Teacher Portal"}
         </p>
       </div>
 
+      <NotificationBell />
       {student ? (
         <>
-          <NotificationBell />
           <Link
             href="/student/profile"
             className="rounded-full transition-opacity hover:opacity-85"

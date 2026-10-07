@@ -1,15 +1,9 @@
 /**
  * Domain model for the PBL Management Platform.
  *
- * V1 implements only what the Student Portal needs, but the shapes are
- * designed so the Faculty (V2), Supervisor (V2.5) and Monitoring (V3)
- * modules can be layered on without reshaping existing entities.
- *
- * Forward-looking entities that are deliberately NOT implemented yet:
- *   coordinator_preferences, weekly_progress, certificates,
- *   questions, answers, marks, evaluations
- * Each has a natural foreign key into the entities defined below
- * (studentId / projectId / facultyId).
+ * Three levels: students form groups and submit work, a supervisor (teacher)
+ * mentors up to seven groups and grades them, and administrators oversee
+ * everything and allocate mentors to groups that have none.
  */
 
 export type Role = "student" | "faculty" | "supervisor" | "admin";
@@ -30,7 +24,7 @@ export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
 
 export interface Student {
   id: string;
-  userId: string;
+  userId: string | null;
 
   // Personal — student-editable
   fullName: string;
@@ -51,15 +45,11 @@ export interface Student {
   section: string;
   batch: string;
   cgpa: number;
-
-  /** Current PBL assignment. Null before allocation (V2.5 flow). */
-  projectId: string | null;
-  coordinatorId: string | null;
 }
 
 export interface Faculty {
   id: string;
-  userId: string;
+  userId: string | null;
   fullName: string;
   facultyId: string;
   department: string;
@@ -67,101 +57,117 @@ export interface Faculty {
   email: string;
   contactNumber: string;
   officeLocation: string;
+  expertise: string;
+  profileUrl?: string;
+  /** True when this teacher has a portal login (can approve requests, grade). */
+  onPortal: boolean;
   avatarUrl?: string;
 }
 
-export type ProjectStatus =
-  | "proposed"
-  | "active"
-  | "under_review"
-  | "completed"
-  | "on_hold";
-
-export interface TeamMember {
+export interface GroupMember {
   studentId: string;
   fullName: string;
   registrationNumber: string;
-  /** Role within the team — free text so teams can self-describe. */
+  email: string;
   teamRole: string;
   avatarUrl?: string;
 }
 
-export interface Project {
+export interface Group {
   id: string;
-  title: string;
-  description: string;
-  domain: string;
-  status: ProjectStatus;
-  /** 0–100. Recomputed from milestones once V1.1 lands. */
-  progress: number;
-  startDate: string;
-  expectedCompletionDate: string;
-  coordinatorId: string;
-  supervisorId: string;
-  teamId: string;
-  repositoryUrl?: string;
-}
-
-export interface Team {
-  id: string;
+  /** Human-facing group number — "Group 4". */
+  number: number;
   name: string;
-  projectId: string;
-  members: TeamMember[];
-  leadStudentId: string;
+  projectTitle: string;
+  projectIdea: string;
+  domain: string;
+  progress: number;
+  leaderStudentId: string;
+  mentorId: string | null;
+  assignedAt?: string;
+  createdAt: string;
+  members: GroupMember[];
 }
 
-export type SubmissionStatus =
-  | "pending"
-  | "submitted"
-  | "under_review"
-  | "overdue";
+export type RequestStatus = "pending" | "approved" | "rejected" | "closed";
 
-export type DeadlineKind =
-  | "weekly_progress"
-  | "review"
-  | "document"
-  | "certificate"
-  | "presentation";
-
-export interface Deadline {
+export interface MentorRequest {
   id: string;
-  projectId: string;
-  /** Scoped to a student when the task is individual rather than team-wide. */
-  studentId?: string;
-  title: string;
-  description: string;
-  kind: DeadlineKind;
-  dueDate: string;
-  status: SubmissionStatus;
-  /** Set once the student submits. */
-  submittedAt?: string;
-  weightage?: number;
-  /** Uploaded file in the private `submissions` storage bucket. */
+  groupId: string;
+  facultyId: string;
+  facultyName: string;
+  message: string;
+  status: RequestStatus;
+  createdAt: string;
+  decidedAt?: string;
+}
+
+export interface WeeklyReport {
+  id: string;
+  groupId: string;
+  week: number;
+  summary: string;
   filePath?: string;
   fileName?: string;
+  submittedBy?: string;
+  submittedAt: string;
+  /** Out of 10, set by the mentor. */
+  grade?: number;
+  feedback?: string;
+  gradedAt?: string;
 }
 
-export type Priority = "normal" | "important" | "urgent";
+export interface StudentGrade {
+  id: string;
+  studentId: string;
+  title: string;
+  score: number;
+  maxScore: number;
+  /** What the student should improve, written by the mentor. */
+  improvements: string;
+  createdAt: string;
+}
+
+export type TicketStatus = "open" | "resolved";
+
+export interface Ticket {
+  id: string;
+  groupId: string;
+  groupNumber?: number;
+  studentId: string;
+  studentName?: string;
+  subject: string;
+  body: string;
+  status: TicketStatus;
+  reply?: string;
+  createdAt: string;
+  repliedAt?: string;
+}
 
 export interface Announcement {
   id: string;
   title: string;
   body: string;
+  /** "all" — every student (admin); "mentor_groups" — the poster's own groups. */
+  scope: "all" | "mentor_groups";
   postedByName: string;
   postedByRole: Role;
-  postedAt: string;
-  priority: Priority;
-  attachment?: { name: string; sizeLabel: string; url: string };
-  /** Null = platform-wide. Set = scoped to one project's team. */
-  projectId: string | null;
+  attachmentPath?: string;
+  attachmentName?: string;
+  createdAt: string;
 }
 
 export type NotificationKind =
-  | "deadline"
   | "announcement"
+  | "report"
+  | "grade"
+  | "ticket"
+  | "request"
+  | "group"
+  | "profile"
+  | "deadline"
   | "submission"
-  | "feedback"
-  | "profile";
+  | "feedback";
 
 export interface Notification {
   id: string;

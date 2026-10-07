@@ -1,11 +1,15 @@
 import {
+  Award,
   Bell,
-  CalendarClock,
-  FolderKanban,
+  BookUser,
+  FileText,
   LayoutDashboard,
+  LifeBuoy,
   Megaphone,
   Settings,
+  UserPlus,
   UserRound,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,8 +19,10 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  /** Key into the badge-count map supplied by the layout. */
-  badge?: "notifications" | "deadlines";
+  /** Key into the badge-count map supplied by the sidebar. */
+  badge?: "notifications";
+  /** Also highlight for nested routes under this path (e.g. a group's page). */
+  matchPrefix?: string;
 }
 
 export interface NavSection {
@@ -24,55 +30,62 @@ export interface NavSection {
   items: NavItem[];
 }
 
-/**
- * Navigation is declared per role, so adding the Faculty (V2) and
- * Supervisor (V2.5) portals is a matter of filling in their arrays —
- * the sidebar component itself needs no changes.
- */
+const teacherNav: NavSection[] = [
+  {
+    items: [
+      { label: "My Groups", href: "/faculty/dashboard", icon: UsersRound, matchPrefix: "/faculty/groups" },
+      { label: "Mentor Requests", href: "/faculty/requests", icon: UserPlus },
+      { label: "Tickets", href: "/faculty/tickets", icon: LifeBuoy },
+      { label: "Announcements", href: "/faculty/announcements", icon: Megaphone },
+    ],
+  },
+  {
+    heading: "Directory",
+    items: [{ label: "Faculty Directory", href: "/faculty/directory", icon: BookUser }],
+  },
+];
+
+/** Navigation per role; the sidebar itself is role-agnostic. */
 export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
   student: [
     {
       items: [
         { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-        { label: "My Profile", href: "/student/profile", icon: UserRound },
-        { label: "My Project", href: "/student/project", icon: FolderKanban },
+        { label: "My Group & Mentor", href: "/student/group", icon: UsersRound },
+        { label: "Weekly Reports", href: "/student/reports", icon: FileText },
+        { label: "Grades & Feedback", href: "/student/grades", icon: Award },
+        { label: "Tickets", href: "/student/tickets", icon: LifeBuoy },
       ],
     },
     {
-      heading: "Activity",
+      heading: "Stay informed",
       items: [
-        {
-          label: "Deadlines",
-          href: "/student/deadlines",
-          icon: CalendarClock,
-          badge: "deadlines",
-        },
-        { label: "Announcements", href: "/student/announcements", icon: Megaphone },
-        {
-          label: "Notifications",
-          href: "/student/notifications",
-          icon: Bell,
-          badge: "notifications",
-        },
+        { label: "Notifications", href: "/student/notifications", icon: Bell, badge: "notifications" },
+        { label: "Faculty Directory", href: "/student/faculty", icon: BookUser },
       ],
     },
     {
       heading: "Account",
-      items: [{ label: "Settings", href: "/student/settings", icon: Settings }],
+      items: [
+        { label: "My Profile", href: "/student/profile", icon: UserRound },
+        { label: "Settings", href: "/student/settings", icon: Settings },
+      ],
     },
   ],
 
-  // Teachers — the full review tools arrive in V2.
-  faculty: [
-    { items: [{ label: "Dashboard", href: "/faculty/dashboard", icon: LayoutDashboard }] },
-  ],
-
-  // Supervisors share the teacher portal until V2.5.
-  supervisor: [
-    { items: [{ label: "Dashboard", href: "/faculty/dashboard", icon: LayoutDashboard }] },
-  ],
+  faculty: teacherNav,
+  supervisor: teacherNav,
 
   admin: [
-    { items: [{ label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }] },
+    {
+      items: [
+        { label: "Overview", href: "/admin/dashboard", icon: LayoutDashboard, matchPrefix: "/admin/groups" },
+        { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
+      ],
+    },
+    {
+      heading: "Directory",
+      items: [{ label: "Faculty Directory", href: "/admin/directory", icon: BookUser }],
+    },
   ],
 };

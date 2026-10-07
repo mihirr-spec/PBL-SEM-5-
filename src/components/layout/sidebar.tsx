@@ -21,15 +21,12 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { user, signOut } = useSession();
-  const { student, deadlines, unreadCount } = usePortal();
+  const { student, unreadCount } = usePortal();
 
   if (!user) return null;
 
   const sections = NAV_BY_ROLE[user.role];
-  const dueSoon = deadlines.filter(
-    (d) => d.status === "pending" || d.status === "overdue",
-  ).length;
-  const counts = { notifications: unreadCount, deadlines: dueSoon };
+  const counts = { notifications: unreadCount };
 
   return (
     <>
@@ -70,7 +67,9 @@ export function Sidebar({
               ) : null}
               <ul className="space-y-0.5">
                 {section.items.map((item) => {
-                  const active = pathname === item.href;
+                  const active =
+                    pathname === item.href ||
+                    (item.matchPrefix != null && pathname.startsWith(item.matchPrefix));
                   const count = item.badge ? counts[item.badge] : 0;
 
                   return (

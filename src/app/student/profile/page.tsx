@@ -13,7 +13,7 @@ import { PageSkeleton } from "@/components/ui/skeleton";
 import { usePortal } from "@/lib/data/portal-store";
 
 export default function ProfilePage() {
-  const { loading, student, coordinator } = usePortal();
+  const { loading, student, mentor } = usePortal();
 
   if (loading || !student) return <PageSkeleton />;
 
@@ -35,7 +35,7 @@ export default function ProfilePage() {
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-1">
           <ProfilePhotoCard student={student} />
-          <MentorCard coordinator={coordinator} />
+          <MentorCard mentor={mentor} />
         </div>
 
         <div className="space-y-5 lg:col-span-2">

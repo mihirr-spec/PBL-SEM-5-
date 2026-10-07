@@ -1,79 +1,75 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ClipboardCheck, FolderKanban, TrendingUp } from "lucide-react";
+import { FileText, LifeBuoy, UserPlus, UsersRound } from "lucide-react";
 
 import { StatTile } from "@/components/dashboard/stat-tile";
-import { ProjectList } from "@/components/staff/project-list";
+import { GroupTable } from "@/components/staff/group-table";
+import { ButtonLink } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth/session";
-import { listProjects, type ProjectSummary } from "@/lib/data/repository";
+import * as repo from "@/lib/data/repository";
+import { useLoad } from "@/lib/use-load";
+
+const MAX_GROUPS = 7;
 
 export default function FacultyDashboardPage() {
   const { user } = useSession();
-  const [rows, setRows] = useState<ProjectSummary[] | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    listProjects(user.profileId).then((result) => {
-      if (!cancelled) setRows(result);
-    });
-    return () => {
-      cancelled = true;
+  const { data } = useLoad(async () => {
+    const [groups, requests, ungraded, tickets] = await Promise.all([
+      repo.listGroups(user!.profileId),
+      repo.listRequestsForFaculty(user!.profileId),
+      repo.countUngradedReports(),
+      repo.listTickets(),
+    ]);
+    const openTickets: Record<string, number> = {};
+    for (const t of tickets) if (t.status === "open") openTickets[t.groupId] = (openTickets[t.groupId] ?? 0) + 1;
+    return {
+      groups,
+      pendingRequests: requests.filter((r) => r.status === "pending").length,
+      ungraded,
+      openTickets,
     };
-  }, [user]);
+  }, user ? user.id : null);
 
-  if (!user || !rows) return <PageSkeleton />;
+  if (!user || !data) return <PageSkeleton />;
 
-  const average = rows.length
-    ? Math.round(rows.reduce((sum, r) => sum + r.project.progress, 0) / rows.length)
-    : 0;
-  const inReview = rows.filter((r) => r.project.status === "under_review").length;
+  const ungradedTotal = data.groups.reduce((n, g) => n + (data.ungraded[g.id] ?? 0), 0);
+  const ticketTotal = data.groups.reduce((n, g) => n + (data.openTickets[g.id] ?? 0), 0);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Teacher Portal"
+        eyebrow="Supervisor"
         title="Welcome,"
         emphasis={`${user.displayName}.`}
-        description="The PBL teams you coordinate and supervise this semester."
+        description="Your PBL groups this semester. Open a group to see the whole team, grade reports and students, and answer tickets."
         art="capitol"
+        action={
+          data.pendingRequests > 0 ? (
+            <ButtonLink href="/faculty/requests" size="sm">
+              <UserPlus className="size-3.5" />
+              {data.pendingRequests} mentor request{data.pendingRequests > 1 ? "s" : ""}
+            </ButtonLink>
+          ) : null
+        }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatTile
-          icon={FolderKanban}
-          label="Your teams"
-          value={rows.length}
-          caption="Coordinating or supervising"
-          art="avenue"
-        />
-        <StatTile
-          icon={TrendingUp}
-          label="Average progress"
-          value={`${average}%`}
-          caption="Across your teams"
-          tone="sage"
-          art="capitol"
-        />
-        <StatTile
-          icon={ClipboardCheck}
-          label="Under review"
-          value={inReview}
-          caption="Waiting on your feedback"
-          tone="gold"
-          art="boulevard"
-        />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatTile icon={UsersRound} label="Groups" value={`${data.groups.length}/${MAX_GROUPS}`} caption="Supervising" art="avenue" />
+        <StatTile icon={UserPlus} label="Requests" value={data.pendingRequests} caption="Waiting for your decision" tone="sage" art="capitol" />
+        <StatTile icon={FileText} label="Reports to grade" value={ungradedTotal} caption="Across your groups" tone="gold" art="boulevard" />
+        <StatTile icon={LifeBuoy} label="Open tickets" value={ticketTotal} caption="From your students" tone={ticketTotal > 0 ? "clay" : "neutral"} art="campus" />
       </div>
 
-      <ProjectList title="Your project teams" rows={rows} facultyId={user.profileId} />
-
-      <p className="px-1 text-[12px] leading-relaxed text-stone-500">
-        Reviewing weekly progress, giving feedback and entering marks arrive in
-        the next release of the teacher portal.
-      </p>
+      <GroupTable
+        title="My groups"
+        description="Click a group to open the full team view."
+        groups={data.groups}
+        hrefBase="/faculty/groups"
+        pendingReports={data.ungraded}
+        openTickets={data.openTickets}
+      />
     </div>
   );
 }
