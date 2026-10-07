@@ -24,11 +24,12 @@ import type { Role, User } from "@/lib/types";
 
 const STORAGE_KEY = "pbl.session.v1";
 
-/** Landing route per role. Faculty and Supervisor portals arrive in V2 / V2.5. */
+/** Landing route per role. Supervisors share the teacher portal for now. */
 export const HOME_BY_ROLE: Record<Role, string> = {
   student: "/student/dashboard",
   faculty: "/faculty/dashboard",
-  supervisor: "/supervisor/dashboard",
+  supervisor: "/faculty/dashboard",
+  admin: "/admin/dashboard",
 };
 
 /* ------------------------- localStorage store ------------------------- */
@@ -93,7 +94,8 @@ interface SessionContextValue {
   signIn: (
     email: string,
     password: string,
-  ) => Promise<{ ok: true } | { ok: false; error: string }>;
+    roles?: Role[],
+  ) => Promise<{ ok: true; user: User } | { ok: false; error: string }>;
   signOut: () => void;
 }
 
@@ -112,11 +114,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = useCallback<SessionContextValue["signIn"]>(
-    async (email, password) => {
-      const result = await authenticate({ email, password });
+    async (email, password, roles) => {
+      const result = await authenticate({ email, password, roles });
       if (!result.ok) return result;
       writeUser(result.user);
-      return { ok: true };
+      return { ok: true, user: result.user };
     },
     [],
   );

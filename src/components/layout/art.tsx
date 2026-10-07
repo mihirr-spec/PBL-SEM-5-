@@ -17,6 +17,8 @@ export const ART = {
   // always anchored left and framed narrower than its full width.
   terrace: { src: "/art/art-bottom-left.svg", width: 300, height: 186, position: "object-left" },
   campus: { src: "/campus.webp", width: 812, height: 1024 },
+  // Landscape painting used behind the sign-in screen; open paper on the left.
+  painting: { src: "/art/login-bg.webp", width: 1536, height: 1024, position: "object-right" },
 } as const satisfies Record<
   string,
   { src: string; width: number; height: number; position?: string }

@@ -12,7 +12,7 @@
  * (studentId / projectId / facultyId).
  */
 
-export type Role = "student" | "faculty" | "supervisor";
+export type Role = "student" | "faculty" | "supervisor" | "admin";
 
 /** Account record. Role drives both routing and navigation. */
 export interface User {

@@ -62,9 +62,17 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     },
   ],
 
-  // Populated in V2.
-  faculty: [],
+  // Teachers — the full review tools arrive in V2.
+  faculty: [
+    { items: [{ label: "Dashboard", href: "/faculty/dashboard", icon: LayoutDashboard }] },
+  ],
 
-  // Populated in V2.5.
-  supervisor: [],
+  // Supervisors share the teacher portal until V2.5.
+  supervisor: [
+    { items: [{ label: "Dashboard", href: "/faculty/dashboard", icon: LayoutDashboard }] },
+  ],
+
+  admin: [
+    { items: [{ label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }] },
+  ],
 };

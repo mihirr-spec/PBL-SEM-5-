@@ -8,7 +8,7 @@ import { Art } from "@/components/layout/art";
 import { Brand } from "@/components/layout/brand";
 import { NAV_BY_ROLE } from "@/components/layout/nav-config";
 import { Avatar } from "@/components/ui/avatar";
-import { useSession } from "@/lib/auth/session";
+import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
 import { usePortal } from "@/lib/data/portal-store";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export function Sidebar({
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-white/60 px-5">
-          <Brand href="/student/dashboard" />
+          <Brand href={HOME_BY_ROLE[user.role]} />
           <button
             onClick={onClose}
             className="rounded-md p-1.5 text-stone-400 hover:bg-white/70 hover:text-ink-800 lg:hidden"

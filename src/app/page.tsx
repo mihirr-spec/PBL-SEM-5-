@@ -2,11 +2,8 @@ import {
   ArrowRight,
   Award,
   Building2,
-  ClipboardList,
-  Flag,
   FolderKanban,
   GraduationCap,
-  Lightbulb,
   LineChart,
   ShieldCheck,
   UsersRound,
@@ -15,6 +12,7 @@ import {
 import { Brand } from "@/components/layout/brand";
 import { CampusAccent } from "@/components/layout/campus-accent";
 import { CampusBackdrop } from "@/components/layout/campus-backdrop";
+import { Doodle, type DoodleKey } from "@/components/layout/doodle";
 import { ButtonLink } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { cn } from "@/lib/utils";
@@ -51,28 +49,28 @@ const FEATURES = [
   },
 ] as const;
 
-const STEPS = [
+const STEPS: ReadonlyArray<{ doodle: DoodleKey; title: string; body: string }> = [
   {
-    icon: Lightbulb,
+    doodle: "bulb",
     title: "Form / Join Project",
     body: "Create or join a project and form your team.",
   },
   {
-    icon: ClipboardList,
+    doodle: "triangle",
     title: "Plan & Track",
     body: "Set milestones, track progress and manage deadlines.",
   },
   {
-    icon: UsersRound,
+    doodle: "globe",
     title: "Collaborate",
     body: "Work with your team, mentors and faculty.",
   },
   {
-    icon: Flag,
+    doodle: "book",
     title: "Submit & Get Evaluated",
     body: "Submit your work, receive feedback and complete your PBL.",
   },
-] as const;
+];
 
 const AUDIENCES = [
   {
@@ -178,7 +176,11 @@ export default function LandingPage() {
         id="features"
         className="relative isolate overflow-hidden px-5 pt-20 pb-16 sm:px-8 sm:pt-24"
       >
-        <CampusAccent side="right" />
+        <CampusAccent side="right" art="capitol" />
+        <Doodle
+          name="cluster"
+          className="absolute top-6 right-4 -z-10 hidden w-56 opacity-80 lg:block xl:w-64"
+        />
 
         <div className="mx-auto max-w-5xl">
           <Eyebrow lead="Core" emphasis="Features" />
@@ -238,7 +240,7 @@ export default function LandingPage() {
 
       {/* ---------------------------- how it works ----------------------- */}
       <section className="relative isolate overflow-hidden px-5 py-20 text-center sm:px-8">
-        <CampusAccent side="left" />
+        <CampusAccent side="left" art="boulevard" />
 
         <div className="mx-auto max-w-5xl">
           <Eyebrow lead="How it" emphasis="Works" />
@@ -251,7 +253,7 @@ export default function LandingPage() {
           </p>
 
           <ol className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-            {STEPS.map(({ icon: Icon, title, body }, index) => (
+            {STEPS.map(({ doodle, title, body }, index) => (
               <li key={title} className="flex flex-col items-center">
                 <span className="tnum text-[13px] font-semibold tracking-[0.1em] text-ink-800">
                   {String(index + 1).padStart(2, "0")}
@@ -276,12 +278,8 @@ export default function LandingPage() {
                   />
                 </div>
 
-                <Icon
-                  className="mt-6 size-7 text-azure-600"
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-                <h3 className="mt-4 text-[14.5px] font-semibold tracking-tight text-ink-900">
+                <Doodle name={doodle} className="mt-5 h-16 w-auto" />
+                <h3 className="mt-3 text-[14.5px] font-semibold tracking-tight text-ink-900">
                   {title}
                 </h3>
                 <p className="mt-2 max-w-[15rem] text-[13.5px] leading-relaxed text-stone-600">
@@ -295,7 +293,11 @@ export default function LandingPage() {
 
       {/* ------------------------ who it is built for -------------------- */}
       <section className="relative isolate overflow-hidden px-5 py-20 text-center sm:px-8">
-        <CampusAccent side="right" />
+        <CampusAccent side="right" art="avenue" />
+        <Doodle
+          name="pencil"
+          className="absolute top-14 left-[8%] -z-10 hidden w-10 -rotate-12 opacity-70 lg:block"
+        />
 
         <div className="mx-auto max-w-5xl">
           <Eyebrow lead="Built for" emphasis="The PBL Ecosystem" />
@@ -327,6 +329,7 @@ export default function LandingPage() {
       <section className="border-y border-sand-200 bg-ivory-50">
         <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <div>
+            <Doodle name="bulb" className="mb-4 w-10 opacity-80" />
             <h2 className="font-display text-[1.9rem] leading-tight tracking-tight text-ink-900">
               Designed to grow, not to be rebuilt
             </h2>
@@ -368,8 +371,19 @@ export default function LandingPage() {
 
       {/* ------------------------------- cta ----------------------------- */}
       <section className="relative isolate overflow-hidden px-5 py-20 text-center sm:px-8">
-        <CampusAccent side="left" />
-        <CampusAccent side="right" />
+        <Doodle
+          name="books"
+          className="absolute bottom-0 left-0 -z-10 hidden w-64 opacity-85 lg:block xl:w-72"
+        />
+        <CampusAccent
+          side="right"
+          art="painting"
+          className="[&_img]:opacity-80"
+        />
+        <Doodle
+          name="plane"
+          className="absolute top-16 left-[30%] -z-10 hidden w-9 opacity-70 sm:block"
+        />
 
         <div className="mx-auto max-w-2xl">
           <Eyebrow lead="Ready" emphasis="To Get Started?" />

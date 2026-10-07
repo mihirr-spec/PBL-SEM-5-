@@ -15,9 +15,37 @@ import {
 
 import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
 import { demoPassword } from "@/lib/data/seed";
+import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const DEMO_EMAIL = "mihir.sanghvi@university.edu.in";
+/** One sign-in tab per kind of account, each with its demo login. */
+const TABS = [
+  {
+    key: "student",
+    label: "Student",
+    roles: ["student"],
+    demoEmail: "mihir.sanghvi@university.edu.in",
+  },
+  {
+    key: "teacher",
+    label: "Teacher",
+    roles: ["faculty", "supervisor"],
+    demoEmail: "a.deshpande@university.edu.in",
+  },
+  {
+    key: "admin",
+    label: "Administrator",
+    roles: ["admin"],
+    demoEmail: "pbl.admin@university.edu.in",
+  },
+] as const satisfies ReadonlyArray<{
+  key: string;
+  label: string;
+  roles: readonly Role[];
+  demoEmail: string;
+}>;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 const control =
   "h-12 w-full rounded-lg border border-[#c9d1dc] bg-white/90 pl-12 pr-4 text-[14.5px] text-ink-900 placeholder:text-stone-400 transition-colors hover:border-ink-400/60 focus:border-azure-500 focus:outline-none focus:ring-3 focus:ring-azure-100";
@@ -29,6 +57,8 @@ export function LoginForm() {
   const { signIn, user, loading } = useSession();
   const router = useRouter();
 
+  const [tabKey, setTabKey] = useState<TabKey>("student");
+  const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -46,9 +76,9 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
 
-    const result = await signIn(email, password);
+    const result = await signIn(email, password, [...tab.roles]);
     if (result.ok) {
-      router.replace("/student/dashboard");
+      router.replace(HOME_BY_ROLE[result.user.role]);
       return;
     }
 
@@ -57,14 +87,45 @@ export function LoginForm() {
   }
 
   function fillDemo() {
-    setEmail(DEMO_EMAIL);
+    setEmail(tab.demoEmail);
     setPassword(demoPassword);
+    setError(null);
+  }
+
+  function chooseTab(key: TabKey) {
+    setTabKey(key);
+    setEmail("");
+    setPassword("");
     setError(null);
   }
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="mt-7 space-y-4" noValidate>
+      <div
+        role="tablist"
+        aria-label="Account type"
+        className="mt-6 grid grid-cols-3 gap-1 rounded-xl bg-ink-900/[0.06] p-1"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={t.key === tabKey}
+            onClick={() => chooseTab(t.key)}
+            className={cn(
+              "rounded-lg px-2 py-2 text-[13px] font-medium transition-colors",
+              t.key === tabKey
+                ? "bg-white text-ink-900 shadow-[0_4px_12px_-6px_rgba(13,31,63,0.45)]"
+                : "text-stone-600 hover:text-ink-800",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
         <div>
           <label
             htmlFor="email"
@@ -202,7 +263,7 @@ export function LoginForm() {
           onClick={fillDemo}
           className="mt-4 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
         >
-          Trying it out? Use the demo account
+          Trying it out? Use the demo {tab.label.toLowerCase()} account
         </button>
       </div>
     </>

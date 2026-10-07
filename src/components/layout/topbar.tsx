@@ -42,23 +42,28 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
           {pageLabel}
         </p>
         <p className="truncate text-[11.5px] text-ink-400">
-          Semester {student?.semester ?? "—"} · {student?.batch ?? "Student Portal"}
+          {student
+            ? `Semester ${student.semester} · ${student.batch}`
+            : user?.role === "admin"
+              ? "Administrator Portal"
+              : "Teacher Portal"}
         </p>
       </div>
 
-      <NotificationBell />
-
-      <Link
-        href="/student/profile"
-        className="rounded-full transition-opacity hover:opacity-85"
-        aria-label="Open your profile"
-      >
-        <Avatar
-          name={student?.fullName ?? user?.displayName ?? "Student"}
-          src={student?.avatarUrl}
-          size="sm"
-        />
-      </Link>
+      {student ? (
+        <>
+          <NotificationBell />
+          <Link
+            href="/student/profile"
+            className="rounded-full transition-opacity hover:opacity-85"
+            aria-label="Open your profile"
+          >
+            <Avatar name={student.fullName} src={student.avatarUrl} size="sm" />
+          </Link>
+        </>
+      ) : (
+        <Avatar name={user?.displayName ?? "Staff"} size="sm" />
+      )}
     </header>
   );
 }

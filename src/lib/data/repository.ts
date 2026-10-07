@@ -15,6 +15,7 @@ import type {
   Faculty,
   Notification,
   Project,
+  Role,
   Student,
   Team,
   User,
@@ -39,7 +40,16 @@ const settle = <T>(value: T): Promise<T> =>
 export interface Credentials {
   email: string;
   password: string;
+  /** Roles the chosen sign-in tab accepts; omitted means any role. */
+  roles?: Role[];
 }
+
+const ROLE_LABEL: Record<Role, string> = {
+  student: "a student",
+  faculty: "a teacher",
+  supervisor: "a teacher",
+  admin: "an administrator",
+};
 
 export type AuthResult =
   | { ok: true; user: User }
@@ -48,6 +58,7 @@ export type AuthResult =
 export async function authenticate({
   email,
   password,
+  roles,
 }: Credentials): Promise<AuthResult> {
   await new Promise((r) => setTimeout(r, 450));
 
@@ -59,11 +70,10 @@ export async function authenticate({
     return { ok: false, error: "Incorrect email or password. Please try again." };
   }
 
-  if (user.role !== "student") {
+  if (roles && !roles.includes(user.role)) {
     return {
       ok: false,
-      error:
-        "The Faculty and Supervisor portals are not available in this release.",
+      error: `This is ${ROLE_LABEL[user.role]} account — switch to the matching tab above to sign in.`,
     };
   }
 
@@ -206,5 +216,50 @@ export async function setNotificationRead(
 export async function markAllNotificationsRead(userId: string): Promise<void> {
   notifications.forEach((n, i) => {
     if (n.userId === userId) notifications[i] = { ...n, read: true };
+  });
+}
+
+/* ----------------------------- staff ----------------------------- */
+
+/** Every project with its coordinator's name, for the staff dashboards. */
+export interface ProjectSummary {
+  project: Project;
+  coordinatorName: string;
+  supervisorName: string;
+}
+
+export async function listProjects(
+  facultyId?: string,
+): Promise<ProjectSummary[]> {
+  const nameOf = (id: string) =>
+    faculty.find((f) => f.id === id)?.fullName ?? "Unassigned";
+  const rows = projects
+    .filter(
+      (p) =>
+        !facultyId || p.coordinatorId === facultyId || p.supervisorId === facultyId,
+    )
+    .map((project) => ({
+      project,
+      coordinatorName: nameOf(project.coordinatorId),
+      supervisorName: nameOf(project.supervisorId),
+    }));
+  return settle(rows);
+}
+
+export interface Overview {
+  students: number;
+  faculty: number;
+  projects: number;
+  openDeadlines: number;
+}
+
+export async function getOverview(): Promise<Overview> {
+  return settle({
+    students: students.length,
+    faculty: faculty.length,
+    projects: projects.length,
+    openDeadlines: deadlines.filter(
+      (d) => d.status === "pending" || d.status === "overdue",
+    ).length,
   });
 }

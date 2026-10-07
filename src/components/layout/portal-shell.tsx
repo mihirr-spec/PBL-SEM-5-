@@ -30,9 +30,13 @@ export function PortalShell({
   role,
   children,
 }: {
-  role: Role;
+  /** Role, or roles, allowed into this portal. */
+  role: Role | Role[];
   children: ReactNode;
 }) {
+  // Joined into a string so the guard effect only re-runs when the set changes.
+  const allowedKey = (Array.isArray(role) ? role : [role]).join(",");
+  const isAllowed = (r: Role) => allowedKey.split(",").includes(r);
   const { user, loading } = useSession();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,12 +45,12 @@ export function PortalShell({
     if (loading) return;
     if (!user) {
       router.replace("/login");
-    } else if (user.role !== role) {
+    } else if (!allowedKey.split(",").includes(user.role)) {
       router.replace(HOME_BY_ROLE[user.role]);
     }
-  }, [loading, user, role, router]);
+  }, [loading, user, allowedKey, router]);
 
-  if (loading || !user || user.role !== role) return <FullPageSpinner />;
+  if (loading || !user || !isAllowed(user.role)) return <FullPageSpinner />;
 
   return (
     <PortalProvider>

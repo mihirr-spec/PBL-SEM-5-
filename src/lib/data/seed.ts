@@ -45,6 +45,13 @@ export const users: User[] = [
     displayName: "Dr. Ramesh Kulkarni",
     profileId: "f-302",
   },
+  {
+    id: "u-9001",
+    email: "pbl.admin@university.edu.in",
+    role: "admin",
+    displayName: "PBL Office",
+    profileId: "adm-1",
+  },
 ];
 
 export const faculty: Faculty[] = [
@@ -111,6 +118,35 @@ export const projects: Project[] = [
     supervisorId: "f-302",
     teamId: "t-701",
     repositoryUrl: "https://github.com/pbl-cse-1184/crop-disease-detection",
+  },
+  // Other Semester 5 projects — listed in the staff dashboards only.
+  {
+    id: "p-502",
+    title: "Smart Campus Energy Monitor",
+    description:
+      "IoT sensors and a dashboard that track electricity use across campus blocks and flag waste.",
+    domain: "Internet of Things",
+    status: "active",
+    progress: 48,
+    startDate: "2026-08-12",
+    expectedCompletionDate: "2026-11-20",
+    coordinatorId: "f-301",
+    supervisorId: "f-302",
+    teamId: "t-702",
+  },
+  {
+    id: "p-503",
+    title: "Accessible Library Navigator",
+    description:
+      "An indoor navigation app that guides visually impaired students through the central library.",
+    domain: "Mobile · Accessibility",
+    status: "under_review",
+    progress: 72,
+    startDate: "2026-08-12",
+    expectedCompletionDate: "2026-11-20",
+    coordinatorId: "f-302",
+    supervisorId: "f-301",
+    teamId: "t-703",
   },
 ];
 
