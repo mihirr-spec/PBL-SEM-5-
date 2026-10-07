@@ -23,7 +23,7 @@ export default function ProfilePage() {
         eyebrow="My Profile"
         title="Your student"
         emphasis="record."
-        art="capitol"
+        scene="profile"
         description="Personal details are yours to maintain. Academic information is issued by the university and shown here for reference."
         action={
           <ButtonLink href="/student/settings" variant="secondary" size="sm" className="bg-white/70 backdrop-blur-md">

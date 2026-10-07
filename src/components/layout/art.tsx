@@ -19,6 +19,8 @@ export const ART = {
   campus: { src: "/campus.webp", width: 812, height: 1024 },
   // Landscape painting used behind the sign-in screen; open paper on the left.
   painting: { src: "/art/login-bg.webp", width: 1536, height: 1024, position: "object-right" },
+  // Photograph of the main building reflected in rain water.
+  photo: { src: "/coverpage.png", width: 615, height: 574, position: "object-[center_42%]" },
 } as const satisfies Record<
   string,
   { src: string; width: number; height: number; position?: string }

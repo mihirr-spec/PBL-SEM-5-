@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Art, type ArtKey } from "@/components/layout/art";
+import { DoodleVignette, type SceneKey } from "@/components/layout/doodle-scene";
 import { cn } from "@/lib/utils";
 
 export function Card({
@@ -13,7 +13,7 @@ export function Card({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-[20px] border border-white/70 bg-white/70 shadow-[0_1px_2px_rgba(61,78,92,0.05),0_20px_50px_-30px_rgba(61,78,92,0.45)] backdrop-blur-xl",
+        "overflow-hidden rounded-[20px] border border-white/90 bg-white/88 shadow-[0_1px_2px_rgba(61,78,92,0.05),0_20px_50px_-30px_rgba(61,78,92,0.45)] backdrop-blur-xl",
         className,
       )}
     >
@@ -68,14 +68,14 @@ export function EmptyState({
   icon,
   title,
   description,
-  art = "avenue",
+  scene = "directory",
   className,
 }: {
   icon?: ReactNode;
   title: string;
   description?: string;
-  /** Watercolour vignette shown above the message. */
-  art?: ArtKey;
+  /** Doodle vignette shown above the message. */
+  scene?: SceneKey;
   className?: string;
 }) {
   return (
@@ -86,12 +86,7 @@ export function EmptyState({
       )}
     >
       <div className="relative mb-4">
-        <Art
-          name={art}
-          fade="soft"
-          sizes="220px"
-          className="h-28 w-auto opacity-80"
-        />
+        <DoodleVignette scene={scene} />
         {icon ? (
           <div className="absolute -bottom-2 left-1/2 flex size-10 -translate-x-1/2 items-center justify-center rounded-full border border-white/80 bg-white/90 text-azure-600 shadow-[0_8px_20px_-12px_rgba(13,31,63,0.6)]">
             {icon}

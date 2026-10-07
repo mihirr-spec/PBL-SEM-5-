@@ -31,7 +31,7 @@ export default function NotificationsPage() {
         title="What's"
         emphasis="new for you."
         description="Announcements and files from your supervisor and the PBL office, plus updates on your reports, grades and tickets."
-        art="campus"
+        scene="notifications"
         action={
           unreadCount > 0 ? (
             <Button size="sm" onClick={markAllRead}>

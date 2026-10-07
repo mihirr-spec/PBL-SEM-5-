@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-import { Art, type ArtKey } from "@/components/layout/art";
+import { Doodle, type DoodleKey } from "@/components/layout/doodle";
 import { cn } from "@/lib/utils";
 
 /** Single headline figure. Four of these form the dashboard's top row. */
@@ -10,14 +10,14 @@ export function StatTile({
   value,
   caption,
   tone = "neutral",
-  art = "capitol",
+  doodle = "book",
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number;
   caption?: string;
   tone?: "neutral" | "gold" | "clay" | "sage";
-  art?: ArtKey;
+  doodle?: DoodleKey;
 }) {
   const tones = {
     neutral: "bg-azure-50 text-azure-600",
@@ -27,14 +27,9 @@ export function StatTile({
   } as const;
 
   return (
-    <div className="relative overflow-hidden rounded-[18px] border border-white/70 bg-white/65 px-4 py-3.5 shadow-[0_18px_40px_-30px_rgba(61,78,92,0.5)] backdrop-blur-xl transition-transform hover:-translate-y-0.5">
-      {/* Faint sketch tucked into the corner of every tile */}
-      <Art
-        name={art}
-        fade="left"
-        sizes="160px"
-        className="absolute -right-3 -bottom-3 h-20 w-auto opacity-25"
-      />
+    <div className="relative overflow-hidden rounded-[18px] border border-white/70 bg-white/88 px-4 py-3.5 shadow-[0_18px_40px_-30px_rgba(61,78,92,0.5)] backdrop-blur-xl transition-transform hover:-translate-y-0.5">
+      {/* A different doodle tucked into the corner of every tile */}
+      <Doodle name={doodle} className="absolute right-3 bottom-2 h-14 w-auto opacity-45" />
       <div className="relative flex items-center gap-2.5">
         <span
           className={cn(

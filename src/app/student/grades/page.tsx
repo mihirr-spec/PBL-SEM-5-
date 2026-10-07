@@ -32,7 +32,7 @@ export default function GradesPage() {
         title="Grades and"
         emphasis="improvements."
         description="Marks from your supervisor, with what to work on next."
-        art="capitol"
+        scene="grades"
       />
 
       <Card>
@@ -66,7 +66,7 @@ export default function GradesPage() {
       <Card>
         <CardHeader title="Group weekly report grades" />
         {data.reports.length === 0 ? (
-          <EmptyState title="No graded reports yet" art="boulevard" />
+          <EmptyState title="No graded reports yet" scene="reports" />
         ) : (
           <ul className="divide-y divide-sand-200/70">
             {data.reports.map((r) => (

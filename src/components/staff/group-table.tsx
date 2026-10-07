@@ -31,7 +31,7 @@ export function GroupTable({
     <Card>
       <CardHeader title={title} description={description} />
       {groups.length === 0 ? (
-        <EmptyState title="No groups yet" description="Groups appear here once they are assigned." art="capitol" />
+        <EmptyState title="No groups yet" description="Groups appear here once they are assigned." scene="team" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[44rem] text-left">

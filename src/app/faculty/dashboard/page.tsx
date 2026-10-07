@@ -5,7 +5,7 @@ import { FileText, LifeBuoy, UserPlus, UsersRound } from "lucide-react";
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { GroupTable } from "@/components/staff/group-table";
 import { ButtonLink } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/page-header";
+import { DashboardHero } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth/session";
 import * as repo from "@/lib/data/repository";
@@ -39,12 +39,13 @@ export default function FacultyDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <DashboardHero
         eyebrow="Supervisor"
         title="Welcome,"
         emphasis={`${user.displayName}.`}
         description="Your PBL groups this semester. Open a group to see the whole team, grade reports and students, and answer tickets."
-        art="capitol"
+        image="campus"
+        imageClassName="object-[center_40%]"
         action={
           data.pendingRequests > 0 ? (
             <ButtonLink href="/faculty/requests" size="sm">
@@ -56,10 +57,10 @@ export default function FacultyDashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatTile icon={UsersRound} label="Groups" value={`${data.groups.length}/${MAX_GROUPS}`} caption="Supervising" art="avenue" />
-        <StatTile icon={UserPlus} label="Requests" value={data.pendingRequests} caption="Waiting for your decision" tone="sage" art="capitol" />
-        <StatTile icon={FileText} label="Reports to grade" value={ungradedTotal} caption="Across your groups" tone="gold" art="boulevard" />
-        <StatTile icon={LifeBuoy} label="Open tickets" value={ticketTotal} caption="From your students" tone={ticketTotal > 0 ? "clay" : "neutral"} art="campus" />
+        <StatTile icon={UsersRound} label="Groups" value={`${data.groups.length}/${MAX_GROUPS}`} caption="Supervising" doodle="book" />
+        <StatTile icon={UserPlus} label="Requests" value={data.pendingRequests} caption="Waiting for your decision" tone="sage" doodle="pencil" />
+        <StatTile icon={FileText} label="Reports to grade" value={ungradedTotal} caption="Across your groups" tone="gold" doodle="books" />
+        <StatTile icon={LifeBuoy} label="Open tickets" value={ticketTotal} caption="From your students" tone={ticketTotal > 0 ? "clay" : "neutral"} doodle="globe" />
       </div>
 
       <GroupTable

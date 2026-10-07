@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { ArrowUpRight, Award, Bell, FileText, LifeBuoy, UsersRound } from "lucide-react";
 
-import { Art } from "@/components/layout/art";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { MentorCard } from "@/components/profile/mentor-card";
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, EmptyState } from "@/components/ui/card";
+import { DashboardHero } from "@/components/ui/page-header";
 import { ProgressBar } from "@/components/ui/progress";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import * as repo from "@/lib/data/repository";
@@ -48,30 +48,18 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* ------------------------------ hero ------------------------------ */}
-      <header className="animate-fade-rise relative isolate overflow-hidden rounded-[28px] border border-white/60 bg-white/50 shadow-[0_30px_80px_-36px_rgba(61,78,92,0.55)] backdrop-blur-xl">
-        <div className="absolute inset-y-0 right-0 -z-10 w-full sm:w-[55%]" aria-hidden>
-          <Art
-            name="campus"
-            blend={false}
-            priority
-            sizes="(max-width: 640px) 100vw, 520px"
-            className="h-full w-full object-cover object-[center_30%] opacity-20 sm:opacity-100 sm:[mask-image:linear-gradient(to_right,transparent_0%,black_38%)]"
-          />
-        </div>
-        <div className="px-6 py-8 sm:max-w-[62%] sm:px-9 sm:py-10">
-          <p className="text-[11px] font-semibold tracking-[0.22em] text-ink-400 uppercase">
-            Student Portal · <span className="text-ink-800">Dashboard</span>
-          </p>
-          <h1 className="mt-3 font-display text-[2.1rem] leading-[1.08] tracking-tight text-ink-900 sm:text-[2.6rem]">
-            {hello.part},<span className="block text-azure-600">{hello.name}.</span>
-          </h1>
-          <p className="mt-3 max-w-md text-[14.5px] leading-relaxed text-stone-600">
-            {group
-              ? `Group ${group.number} · ${group.projectTitle}`
-              : "You are not in a group yet — form one and request a supervisor to get started."}
-          </p>
-        </div>
-      </header>
+      <DashboardHero
+        eyebrow="Dashboard"
+        title={`${hello.part},`}
+        emphasis={`${hello.name}.`}
+        description={
+          group
+            ? `Group ${group.number} · ${group.projectTitle}`
+            : "You are not in a group yet — form one and register your mentor to get started."
+        }
+        image="painting"
+        imageClassName="object-[85%_70%]"
+      />
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* ------------------------ 1. ongoing project ------------------------ */}
@@ -116,7 +104,7 @@ export default function DashboardPage() {
               icon={<UsersRound className="size-5" />}
               title="No group yet"
               description="Form a group with your classmates, then request a supervisor."
-              art="capitol"
+              scene="group"
             />
           )}
         </Card>
@@ -177,7 +165,7 @@ export default function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <EmptyState icon={<Award className="size-5" />} title="No grades yet" art="avenue" />
+            <EmptyState icon={<Award className="size-5" />} title="No grades yet" scene="grades" />
           )}
         </Card>
 
@@ -209,7 +197,7 @@ export default function DashboardPage() {
           }
         />
         {notifications.length === 0 ? (
-          <EmptyState icon={<Bell className="size-5" />} title="Nothing new" art="boulevard" />
+          <EmptyState icon={<Bell className="size-5" />} title="Nothing new" scene="notifications" />
         ) : (
           <ul className="divide-y divide-sand-200/70">
             {notifications.slice(0, 4).map((n) => (

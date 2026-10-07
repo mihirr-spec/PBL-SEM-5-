@@ -25,9 +25,9 @@ export default function ReportsPage() {
   if (!group) {
     return (
       <div>
-        <PageHeader eyebrow="Weekly Reports" title="Weekly" emphasis="reports." art="boulevard" />
+        <PageHeader eyebrow="Weekly Reports" title="Weekly" emphasis="reports." scene="reports" />
         <Card>
-          <EmptyState title="Join a group first" description="Weekly reports are submitted per group." art="avenue" />
+          <EmptyState title="Join a group first" description="Weekly reports are submitted per group." scene="reports" />
           <div className="pb-6 text-center">
             <ButtonLink href="/student/group" size="sm">Go to my group</ButtonLink>
           </div>
@@ -45,7 +45,7 @@ export default function ReportsPage() {
         title="Weekly"
         emphasis="reports."
         description="One report per week for your whole group. You can replace a report until your supervisor grades it."
-        art="boulevard"
+        scene="reports"
       />
 
       <SubmitReport

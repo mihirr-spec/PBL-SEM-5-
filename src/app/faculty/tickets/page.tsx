@@ -25,7 +25,7 @@ export default function FacultyTicketsPage() {
         title="Student"
         emphasis="tickets."
         description="Questions and problems raised by students in your groups. Replies notify the student."
-        art="boulevard"
+        scene="tickets"
       />
       <div className="inline-flex gap-1 rounded-xl bg-white/60 p-1 ring-1 ring-white">
         {[false, true].map((resolved) => (
@@ -43,7 +43,7 @@ export default function FacultyTicketsPage() {
       </div>
       <Card>
         {visible.length === 0 ? (
-          <EmptyState icon={<LifeBuoy className="size-5" />} title="No tickets to show" art="avenue" />
+          <EmptyState icon={<LifeBuoy className="size-5" />} title="No tickets to show" scene="tickets" />
         ) : (
           <TicketList tickets={visible} canReply onChanged={reload} />
         )}

@@ -11,7 +11,7 @@ export default function StudentFacultyPage() {
         title="Find a"
         emphasis="teacher."
         description="Every MUJ faculty member with their department, email and area of expertise."
-        art="avenue"
+        scene="directory"
       />
       <FacultyDirectory />
     </div>

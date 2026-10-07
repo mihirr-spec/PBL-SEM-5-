@@ -44,7 +44,7 @@ export function GroupDetail({ groupId }: { groupId: string }) {
         eyebrow={`Group ${group.number}`}
         title={group.projectTitle}
         description={`${group.name} · ${group.domain || "No domain set"} · Supervisor: ${mentor?.fullName ?? "not assigned"}`}
-        art="capitol"
+        scene="team"
       />
 
       <div className="grid gap-5 lg:grid-cols-3">

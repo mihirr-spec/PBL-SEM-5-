@@ -57,7 +57,7 @@ export default function SettingsPage() {
         eyebrow="Settings"
         title="Account"
         emphasis="settings."
-        art="capitol"
+        scene="settings"
         description="Manage your sign-in credentials and review your account details."
       />
 

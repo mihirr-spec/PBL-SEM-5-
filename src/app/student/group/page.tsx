@@ -45,7 +45,7 @@ export default function GroupPage() {
             ? group.projectTitle
             : "Add your classmates by registration number. Once the group exists, the team lead registers your mentor with the signed PBL form."
         }
-        art="avenue"
+        scene="group"
       />
       {group ? (
         <GroupView group={group} isLeader={isLeader} mentorCard={<MentorCard mentor={mentor} />} onChanged={refresh} />

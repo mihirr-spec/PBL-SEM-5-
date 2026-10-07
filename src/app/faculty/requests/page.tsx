@@ -55,12 +55,12 @@ export default function RequestsPage() {
         title="Groups registering"
         emphasis="with you."
         description="Each team lead uploads the PBL form you signed. Check it, then approve, ask for corrections, or reject. Before approving, the system checks the group isn't already registered with another teacher."
-        art="avenue"
+        scene="requests"
       />
 
       {pending.length === 0 ? (
         <Card>
-          <EmptyState icon={<UserPlus className="size-5" />} title="No forms waiting for review" art="capitol" />
+          <EmptyState icon={<UserPlus className="size-5" />} title="No forms waiting for review" scene="requests" />
         </Card>
       ) : (
         <div className="space-y-4">

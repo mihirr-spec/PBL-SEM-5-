@@ -7,7 +7,7 @@ import { StatTile } from "@/components/dashboard/stat-tile";
 import { GroupTable } from "@/components/staff/group-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, EmptyState } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
+import { DashboardHero } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import * as repo from "@/lib/data/repository";
 import { useLoad } from "@/lib/use-load";
@@ -47,19 +47,19 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <DashboardHero
         eyebrow="Administrator"
         title="PBL at a"
         emphasis="glance."
         description="All groups and their supervisors. Groups that have not secured a mentor can be allotted one at random."
-        art="avenue"
+        image="photo"
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatTile icon={GraduationCap} label="Students" value={overview.students} caption={`${ungrouped.length} not in a group`} art="capitol" />
-        <StatTile icon={UsersRound} label="Groups" value={overview.groups} caption={`${overview.teachersOnPortal} teachers on the portal`} tone="sage" art="avenue" />
-        <StatTile icon={UserX} label="Without supervisor" value={overview.unassignedGroups} caption="Waiting for a mentor" tone={overview.unassignedGroups > 0 ? "gold" : "sage"} art="boulevard" />
-        <StatTile icon={LifeBuoy} label="Open tickets" value={overview.openTickets} caption="Across all groups" tone={overview.openTickets > 0 ? "clay" : "neutral"} art="campus" />
+        <StatTile icon={GraduationCap} label="Students" value={overview.students} caption={`${ungrouped.length} not in a group`} doodle="books" />
+        <StatTile icon={UsersRound} label="Groups" value={overview.groups} caption={`${overview.teachersOnPortal} teachers on the portal`} tone="sage" doodle="globe" />
+        <StatTile icon={UserX} label="Without supervisor" value={overview.unassignedGroups} caption="Waiting for a mentor" tone={overview.unassignedGroups > 0 ? "gold" : "sage"} doodle="bulb" />
+        <StatTile icon={LifeBuoy} label="Open tickets" value={overview.openTickets} caption="Across all groups" tone={overview.openTickets > 0 ? "clay" : "neutral"} doodle="plane" />
       </div>
 
       <Card>

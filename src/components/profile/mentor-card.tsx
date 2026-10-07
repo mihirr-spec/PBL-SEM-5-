@@ -15,7 +15,7 @@ export function MentorCard({ mentor }: { mentor: Faculty | null }) {
         <EmptyState
           title="No supervisor yet"
           description="Request a teacher from your group page. Groups without one are allotted a supervisor by the PBL office."
-          art="avenue"
+          scene="requests"
         />
         <div className="px-5 pb-5 text-center">
           <ButtonLink href="/student/group" size="sm" variant="secondary">

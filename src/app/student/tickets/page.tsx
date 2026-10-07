@@ -26,9 +26,9 @@ export default function TicketsPage() {
   if (!group) {
     return (
       <div>
-        <PageHeader eyebrow="Tickets" title="Raise a" emphasis="ticket." art="capitol" />
+        <PageHeader eyebrow="Tickets" title="Raise a" emphasis="ticket." scene="tickets" />
         <Card>
-          <EmptyState title="Join a group first" description="Tickets go to your group's supervisor." art="avenue" />
+          <EmptyState title="Join a group first" description="Tickets go to your group's supervisor." scene="tickets" />
           <div className="pb-6 text-center">
             <ButtonLink href="/student/group" size="sm">Go to my group</ButtonLink>
           </div>
@@ -64,7 +64,7 @@ export default function TicketsPage() {
             ? `Questions, blockers or requests go straight to ${mentor.fullName}.`
             : "Your group has no supervisor yet — the PBL office will see your ticket."
         }
-        art="capitol"
+        scene="tickets"
       />
 
       <Card>

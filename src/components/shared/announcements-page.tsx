@@ -21,7 +21,7 @@ export function StaffAnnouncementsPage() {
         title="Post to"
         emphasis={user.role === "admin" ? "every student." : "your groups."}
         description="Messages and files land in each student's Notifications tab straight away."
-        art="campus"
+        scene="announcements"
       />
       <AnnouncementComposer user={user} onPosted={() => void reload()} />
       <div>

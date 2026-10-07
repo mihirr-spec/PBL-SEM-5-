@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 export default function FacultyDirectoryPage() {
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Directory" title="MUJ" emphasis="faculty." description="Every faculty member, by department, with email and expertise." art="avenue" />
+      <PageHeader eyebrow="Directory" title="MUJ" emphasis="faculty." description="Every faculty member, by department, with email and expertise." scene="directory" />
       <FacultyDirectory />
     </div>
   );
