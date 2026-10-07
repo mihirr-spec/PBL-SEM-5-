@@ -5,24 +5,23 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
   type ReactNode,
 } from "react";
 
-import { authenticate } from "@/lib/data/repository";
+import { authenticate, loadUser, signOutEverywhere } from "@/lib/data/repository";
+import { supabase } from "@/lib/supabase/client";
 import type { Role, User } from "@/lib/types";
 
 /**
- * Client-side session.
+ * Client-side session, backed by Supabase Auth.
  *
- * V1 persists the signed-in user in localStorage, read through
- * `useSyncExternalStore` so the value is picked up during hydration rather
- * than written in after the first paint. When a real backend lands, only the
- * store below changes — consumers keep using `useSession()`.
+ * supabase-js keeps the auth session in localStorage and refreshes it; this
+ * provider listens for auth changes and resolves the signed-in account to the
+ * app's User (role, display name, profile link) from the `profiles` table.
  */
-
-const STORAGE_KEY = "pbl.session.v1";
 
 /** Landing route per role. Supervisors share the teacher portal for now. */
 export const HOME_BY_ROLE: Record<Role, string> = {
@@ -32,64 +31,9 @@ export const HOME_BY_ROLE: Record<Role, string> = {
   admin: "/admin/dashboard",
 };
 
-/* ------------------------- localStorage store ------------------------- */
-
-const listeners = new Set<() => void>();
-
-/**
- * `getSnapshot` must return a referentially stable value between changes,
- * so the parsed user is cached and only re-parsed when the raw string moves.
- */
-let cachedRaw: string | null = null;
-let cachedUser: User | null = null;
-
-function readUser(): User | null {
-  let raw: string | null = null;
-  try {
-    raw = window.localStorage.getItem(STORAGE_KEY);
-  } catch {
-    // Storage blocked (private browsing) — behave as signed out.
-  }
-
-  if (raw === cachedRaw) return cachedUser;
-
-  cachedRaw = raw;
-  try {
-    cachedUser = raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    cachedUser = null;
-  }
-  return cachedUser;
-}
-
-function writeUser(user: User | null) {
-  try {
-    if (user) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    } else {
-      window.localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {
-    // Session simply won't survive a reload.
-  }
-  listeners.forEach((listener) => listener());
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  // Keep other tabs of the same session in step.
-  window.addEventListener("storage", listener);
-  return () => {
-    listeners.delete(listener);
-    window.removeEventListener("storage", listener);
-  };
-}
-
-/* ------------------------------ context ------------------------------- */
-
 interface SessionContextValue {
   user: User | null;
-  /** False until hydration has read the stored session — prevents a login flash. */
+  /** True until the stored session has been checked — prevents a login flash. */
   loading: boolean;
   signIn: (
     email: string,
@@ -103,34 +47,57 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const user = useSyncExternalStore(subscribe, readUser, () => null);
-  // On the server and during the first hydration pass this is false, which is
-  // exactly the window in which `user` cannot yet be trusted.
-  const hydrated = useSyncExternalStore(
-    subscribe,
-    () => true,
-    () => false,
-  );
+  useEffect(() => {
+    let active = true;
+    // Only the most recent auth event may set the user — a slow profile
+    // lookup for an earlier sign-in must not undo a later sign-out.
+    let latest = 0;
+
+    // Fires once with the stored session (INITIAL_SESSION), then on every
+    // sign-in, sign-out and token refresh.
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "TOKEN_REFRESHED") return;
+      const authUser = session?.user;
+      const ticket = ++latest;
+      // Defer the profile query out of the auth callback, as supabase-js advises.
+      setTimeout(async () => {
+        const next = authUser
+          ? await loadUser(authUser.id, authUser.last_sign_in_at).catch(() => null)
+          : null;
+        if (!active || ticket !== latest) return;
+        setUser(next);
+        setLoading(false);
+      }, 0);
+    });
+
+    return () => {
+      active = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
 
   const signIn = useCallback<SessionContextValue["signIn"]>(
     async (email, password, roles) => {
       const result = await authenticate({ email, password, roles });
-      if (!result.ok) return result;
-      writeUser(result.user);
-      return { ok: true, user: result.user };
+      if (result.ok) setUser(result.user);
+      return result;
     },
     [],
   );
 
   const signOut = useCallback(() => {
-    writeUser(null);
-    router.replace("/login");
+    void signOutEverywhere().finally(() => {
+      setUser(null);
+      router.replace("/login");
+    });
   }, [router]);
 
   const value = useMemo(
-    () => ({ user, loading: !hydrated, signIn, signOut }),
-    [user, hydrated, signIn, signOut],
+    () => ({ user, loading, signIn, signOut }),
+    [user, loading, signIn, signOut],
   );
 
   return (

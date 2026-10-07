@@ -110,9 +110,9 @@ export default function DeadlinesPage() {
       <p className="mt-6 flex items-start gap-2 rounded-[16px] border border-white/70 bg-white/60 px-4 py-3 text-[12.5px] backdrop-blur-md leading-relaxed text-stone-600">
         <Info className="mt-px size-4 shrink-0 text-sky-500" />
         <span>
-          File uploads are not part of this release. Marking a task as submitted
-          records your declaration so your coordinator can follow it up; the
-          attachment flow arrives with weekly progress reporting in V1.1.
+          Uploaded files are stored privately — only your team and your
+          faculty can open them. PDF, Word, PowerPoint, ZIP or images, up to
+          25 MB each.
         </span>
       </p>
     </div>

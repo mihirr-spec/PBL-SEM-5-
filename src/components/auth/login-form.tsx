@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 
 import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
-import { demoPassword } from "@/lib/data/seed";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+/** Shared password of the seeded demo accounts (supabase/migrations). */
+const DEMO_PASSWORD = "pbl@2026";
 
 /** One sign-in tab per kind of account, each with its demo login. */
 const TABS = [
@@ -68,8 +70,10 @@ export function LoginForm() {
 
   // Already signed in — go straight to the role's home.
   useEffect(() => {
-    if (!loading && user) router.replace(HOME_BY_ROLE[user.role]);
-  }, [loading, user, router]);
+    // Not while a submit is in flight: a wrong-tab sign-in is briefly signed
+    // in before it is rejected and signed out again.
+    if (!loading && user && !submitting) router.replace(HOME_BY_ROLE[user.role]);
+  }, [loading, user, submitting, router]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -88,7 +92,7 @@ export function LoginForm() {
 
   function fillDemo() {
     setEmail(tab.demoEmail);
-    setPassword(demoPassword);
+    setPassword(DEMO_PASSWORD);
     setError(null);
   }
 

@@ -46,7 +46,8 @@ interface PortalContextValue extends PortalData {
   updateProfile: (
     patch: Partial<repo.EditableStudentFields>,
   ) => Promise<void>;
-  submitDeadline: (deadlineId: string) => Promise<void>;
+  uploadAvatar: (file: File) => Promise<void>;
+  submitDeadline: (deadlineId: string, file?: File) => Promise<void>;
   markNotificationRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
 }
@@ -98,8 +99,8 @@ export function PortalProvider({ children }: { children: ReactNode }) {
           project ? repo.getTeamForProject(project.id) : Promise.resolve(null),
           repo.getFaculty(student.coordinatorId),
           repo.getFaculty(project?.supervisorId ?? null),
-          repo.getDeadlines(student.projectId, student.id),
-          repo.getAnnouncements(student.projectId),
+          repo.getDeadlines(student.projectId),
+          repo.getAnnouncements(),
           repo.getNotifications(user.id),
         ]);
 
@@ -143,9 +144,21 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     [data.student, patchData],
   );
 
+  const uploadAvatar = useCallback<PortalContextValue["uploadAvatar"]>(
+    async (file) => {
+      if (!user || !data.student) return;
+      const url = await repo.uploadAvatar(user.id, file);
+      const updated = await repo.updateStudent(data.student.id, { avatarUrl: url });
+      patchData((previous) => ({ ...previous, student: updated }));
+    },
+    [user, data.student, patchData],
+  );
+
   const submitDeadline = useCallback<PortalContextValue["submitDeadline"]>(
-    async (deadlineId) => {
-      const updated = await repo.markDeadlineSubmitted(deadlineId);
+    async (deadlineId, file) => {
+      const deadline = data.deadlines.find((d) => d.id === deadlineId);
+      if (!deadline) return;
+      const updated = await repo.markDeadlineSubmitted(deadline, file);
       patchData((previous) => ({
         ...previous,
         deadlines: previous.deadlines.map((d) =>
@@ -153,7 +166,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
         ),
       }));
     },
-    [patchData],
+    [data.deadlines, patchData],
   );
 
   const markNotificationRead = useCallback(
@@ -189,11 +202,13 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       loading,
       unreadCount,
       updateProfile,
+      uploadAvatar,
       submitDeadline,
       markNotificationRead,
       markAllRead,
     }),
     [
+      uploadAvatar,
       data,
       loading,
       unreadCount,

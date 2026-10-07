@@ -37,7 +37,7 @@ export default function SettingsPage() {
     }
 
     setSaving(true);
-    const result = await changePassword(user.id, current, next);
+    const result = await changePassword(user.email, current, next);
     setSaving(false);
 
     if (!result.ok) {

@@ -11,11 +11,11 @@ import { usePortal } from "@/lib/data/portal-store";
 import type { Student } from "@/lib/types";
 
 /**
- * Photo upload. V1 stores the image as a data URL through the repository;
- * when object storage arrives, only `updateProfile`'s backing call changes.
+ * Photo upload to the public `avatars` storage bucket; the student record
+ * keeps only the resulting URL.
  */
 export function ProfilePhotoCard({ student }: { student: Student }) {
-  const { updateProfile } = usePortal();
+  const { updateProfile, uploadAvatar } = usePortal();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,15 +38,9 @@ export function ProfilePhotoCard({ student }: { student: Student }) {
 
     setBusy(true);
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-      });
-      await updateProfile({ avatarUrl: dataUrl });
+      await uploadAvatar(file);
     } catch {
-      setError("That image could not be read. Try another file.");
+      setError("That photo could not be uploaded. Try a PNG, JPG or WebP under 2 MB.");
     } finally {
       setBusy(false);
     }

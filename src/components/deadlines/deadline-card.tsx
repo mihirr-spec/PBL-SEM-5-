@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { CalendarCheck2, CheckCircle2, Clock, Hourglass, Upload } from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
+import {
+  CalendarCheck2,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Hourglass,
+  Upload,
+} from "lucide-react";
 
 import { Badge, SubmissionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePortal } from "@/lib/data/portal-store";
+import { getSubmissionUrl } from "@/lib/data/repository";
 import type { Deadline } from "@/lib/types";
 import {
   cn,
@@ -20,15 +28,39 @@ import {
 export function DeadlineCard({ deadline }: { deadline: Deadline }) {
   const { submitDeadline } = usePortal();
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const days = daysUntil(deadline.dueDate);
   const open = deadline.status === "pending" || deadline.status === "overdue";
   const urgent = open && days <= 2;
 
-  async function handleSubmit() {
+  async function submit(file?: File) {
+    setError(null);
     setSubmitting(true);
-    await submitDeadline(deadline.id);
-    setSubmitting(false);
+    try {
+      await submitDeadline(deadline.id, file);
+    } catch {
+      setError("Upload failed. Use a PDF, Word, PowerPoint, ZIP or image under 25 MB.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) void submit(file);
+  }
+
+  /** Private files open through a short-lived signed link. */
+  async function openFile() {
+    if (!deadline.filePath) return;
+    try {
+      window.open(await getSubmissionUrl(deadline.filePath), "_blank", "noopener");
+    } catch {
+      setError("That file could not be opened.");
+    }
   }
 
   return (
@@ -107,6 +139,16 @@ export function DeadlineCard({ deadline }: { deadline: Deadline }) {
             <CalendarCheck2 className="size-3.5 text-stone-400" />
             Due {formatDate(deadline.dueDate)} · {relativeDays(deadline.dueDate)}
           </span>
+          {deadline.fileName ? (
+            <button
+              type="button"
+              onClick={openFile}
+              className="flex items-center gap-1.5 text-azure-600 hover:underline"
+            >
+              <FileText className="size-3.5" />
+              {deadline.fileName}
+            </button>
+          ) : null}
           {deadline.submittedAt ? (
             <span className="tnum flex items-center gap-1.5 text-sage-500">
               <Clock className="size-3.5" />
@@ -116,12 +158,39 @@ export function DeadlineCard({ deadline }: { deadline: Deadline }) {
         </div>
 
         {open ? (
-          <Button size="sm" loading={submitting} onClick={handleSubmit}>
-            {submitting ? "Submitting" : "Mark as submitted"}
-            {!submitting ? <Upload className="size-3.5" /> : null}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,image/png,image/jpeg"
+              onChange={handleFile}
+              className="hidden"
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={submitting}
+              onClick={() => void submit()}
+            >
+              Mark without file
+            </Button>
+            <Button
+              size="sm"
+              loading={submitting}
+              onClick={() => fileRef.current?.click()}
+            >
+              {submitting ? "Submitting" : "Upload & submit"}
+              {!submitting ? <Upload className="size-3.5" /> : null}
+            </Button>
+          </div>
         ) : null}
       </div>
+
+      {error ? (
+        <p role="alert" className="mt-3 text-[12.5px] text-clay-500">
+          {error}
+        </p>
+      ) : null}
     </article>
   );
 }

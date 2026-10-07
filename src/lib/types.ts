@@ -133,9 +133,12 @@ export interface Deadline {
   kind: DeadlineKind;
   dueDate: string;
   status: SubmissionStatus;
-  /** Set once the student submits. Hook for V1.1 file uploads. */
+  /** Set once the student submits. */
   submittedAt?: string;
   weightage?: number;
+  /** Uploaded file in the private `submissions` storage bucket. */
+  filePath?: string;
+  fileName?: string;
 }
 
 export type Priority = "normal" | "important" | "urgent";
