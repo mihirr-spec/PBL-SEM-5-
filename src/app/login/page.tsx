@@ -15,19 +15,28 @@ export const metadata: Metadata = { title: "Sign in" };
 export default function LoginPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#fbfcfd]">
-      <Image
-        src="/art/login-bg.webp"
-        alt=""
+      {/*
+        On wide windows the painting is held to a fixed height-based width at
+        the right, so the building stays put while the form centres itself in
+        the open paper to its left.
+      */}
+      <div
         aria-hidden
-        fill
-        priority
-        sizes="100vw"
-        className="-z-10 object-cover object-[72%_bottom] lg:object-[right_bottom] [@media(min-aspect-ratio:3/2)]:object-contain [@media(min-aspect-ratio:3/2)]:[mask-image:linear-gradient(to_right,transparent_calc(100%-150vh),black_calc(100%-125vh))]"
-      />
+        className="absolute inset-0 -z-10 wide:left-auto wide:w-[min(100%,158vh)]"
+      >
+        <Image
+          src="/art/login-bg.webp"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1024px) 158vh, 100vw"
+          className="object-cover object-[72%_bottom] wide:object-[right_bottom] wide:[mask-image:linear-gradient(to_right,transparent_0%,black_24%)]"
+        />
+      </div>
       {/* Paper-white haze so the trees never run under the form */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 hidden bg-[radial-gradient(ellipse_48%_70%_at_24%_55%,rgba(253,253,251,0.92)_0%,rgba(253,253,251,0.7)_55%,transparent_100%)] wide:block"
+        className="absolute inset-0 -z-10 hidden bg-[radial-gradient(ellipse_40%_65%_at_30%_55%,rgba(253,253,251,0.92)_0%,rgba(253,253,251,0.7)_55%,transparent_100%)] wide:block"
       />
 
       {/* ------------------------------- header ------------------------------ */}
@@ -39,7 +48,7 @@ export default function LoginPage() {
       </header>
 
       {/* -------------------------------- form ------------------------------- */}
-      <main className="flex flex-1 items-center px-6 pt-8 pb-12 sm:px-12 lg:px-[10%] lg:py-6">
+      <main className="flex flex-1 items-center px-6 pt-8 pb-12 sm:px-12 lg:py-6 wide:w-[max(50%,calc(100%-128vh))] wide:justify-center wide:pb-16">
         <div className="animate-fade-rise w-full max-w-[26.5rem] rounded-[24px] border border-white/70 bg-white/80 p-6 shadow-[0_24px_70px_-34px_rgba(61,78,92,0.45)] backdrop-blur-md sm:p-8 wide:rounded-none wide:border-0 wide:bg-transparent wide:p-0 wide:shadow-none wide:backdrop-blur-none">
           <h1 className="font-display text-[2.6rem] leading-[1.04] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[3.1rem]">
             Welcome <span className="text-azure-600">back</span>
