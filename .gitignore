@@ -42,3 +42,10 @@ next-env.d.ts
 
 # local notes
 docs/PORTAL-GUIDE.md
+
+# local AI-assistant instructions
+AGENTS.md
+CLAUDE.md
+
+# python
+__pycache__/
