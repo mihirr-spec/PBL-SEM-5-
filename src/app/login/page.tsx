@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Sign in" };
 
 /**
  * Sign-in screen: the campus watercolour fills the page and the form sits in
- * a frosted dialog centred over it.
+ * a frosted dialog over the painting's open left side.
  */
 export default function LoginPage() {
   return (
@@ -33,7 +33,9 @@ export default function LoginPage() {
         </Link>
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6">
+      {/* On wide screens the dialog sits in the open paper left of the
+          painting (centred on ~19vw); narrower screens centre it. */}
+      <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 wide:justify-start wide:pl-[max(2.5rem,calc(19vw-13.5rem))]">
         <div
           role="dialog"
           aria-labelledby="signin-title"
