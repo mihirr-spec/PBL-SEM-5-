@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Crown, FileWarning, PencilLine, UserPlus, X } from "lucide-react";
 
+import { DocumentPreview } from "@/components/shared/document-viewer";
 import { FileLink } from "@/components/shared/file-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -216,23 +217,9 @@ function RequestCard({ request, onDecided }: { request: Request; onDecided: () =
   );
 }
 
-/** Shows the signed form inline: PDFs in a frame, scans as an image. */
+/** Shows the signed form inline, drawn in place; the link opens it full screen. */
 function FormPreview({ request }: { request: Request }) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
   const { formPath, formName } = request;
-
-  useEffect(() => {
-    if (!formPath) return;
-    let live = true;
-    repo.getFileUrl("submissions", formPath).then(
-      (signed) => live && setUrl(signed),
-      () => live && setFailed(true),
-    );
-    return () => {
-      live = false;
-    };
-  }, [formPath]);
 
   if (!formPath || !formName) {
     return (
@@ -243,24 +230,14 @@ function FormPreview({ request }: { request: Request }) {
     );
   }
 
-  const isPdf = /\.pdf$/i.test(formName);
-
   return (
     <div className="space-y-2">
-      <div className="overflow-hidden rounded-[14px] bg-white ring-1 ring-sand-200">
-        {url ? (
-          isPdf ? (
-            <iframe src={url} title={`Signed PBL form: ${formName}`} className="h-[28rem] w-full" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL
-            <img src={url} alt={`Signed PBL form: ${formName}`} className="max-h-[28rem] w-full object-contain" />
-          )
-        ) : (
-          <div className="flex h-40 items-center justify-center text-[13px] text-stone-500">
-            {failed ? "Could not load the preview — use the link below." : "Loading form…"}
-          </div>
-        )}
-      </div>
+      <DocumentPreview
+        bucket="submissions"
+        path={formPath}
+        name={formName}
+        className="h-[28rem] rounded-[14px] ring-1 ring-sand-200"
+      />
       <FileLink bucket="submissions" path={formPath} name={formName} />
     </div>
   );

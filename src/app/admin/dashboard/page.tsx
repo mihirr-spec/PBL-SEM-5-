@@ -53,6 +53,7 @@ export default function AdminDashboardPage() {
         emphasis="glance."
         description="All groups and their supervisors. Groups that have not secured a mentor can be allotted one at random."
         image="photo"
+        imageClassName="object-[center_6%]"
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

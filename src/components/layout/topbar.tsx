@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { NAV_BY_ROLE } from "@/components/layout/nav-config";
-import { Avatar } from "@/components/ui/avatar";
+import { ProfileMenu } from "@/components/layout/profile-menu";
 import { useSession } from "@/lib/auth/session";
 import { usePortal } from "@/lib/data/portal-store";
 
@@ -53,19 +52,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <NotificationBell />
-      {student ? (
-        <>
-          <Link
-            href="/student/profile"
-            className="rounded-full transition-opacity hover:opacity-85"
-            aria-label="Open your profile"
-          >
-            <Avatar name={student.fullName} src={student.avatarUrl} size="sm" />
-          </Link>
-        </>
-      ) : (
-        <Avatar name={user?.displayName ?? "Staff"} size="sm" />
-      )}
+      <ProfileMenu />
     </header>
   );
 }
