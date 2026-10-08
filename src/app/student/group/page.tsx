@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Crown, FileSignature, RotateCcw, Send, X } from "lucide-react";
+import { Crown, FileSignature, Hourglass, RotateCcw, Send, UserPlus, X } from "lucide-react";
 
 import { MentorCard } from "@/components/profile/mentor-card";
 import { FacultyDirectory } from "@/components/shared/faculty-directory";
 import { FileLink } from "@/components/shared/file-link";
+import { GetStarted } from "@/components/student/get-started";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import * as repo from "@/lib/data/repository";
 import { usePortal } from "@/lib/data/portal-store";
-import type { Faculty, Group, MentorRequest, RequestStatus } from "@/lib/types";
+import type { Faculty, Group, MentorRequest, RequestStatus, SentInvitation } from "@/lib/types";
 import { useLoad } from "@/lib/use-load";
 import { timeAgo } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ const REQUEST_STATUS: Record<RequestStatus, { tone: "gold" | "sage" | "clay" | "
 };
 
 export default function GroupPage() {
-  const { loading, student, group, mentor, supervisorChange, refresh } = usePortal();
+  const { loading, student, group, mentor, supervisorChange, invitations, refresh } = usePortal();
 
   if (loading || !student) return <PageSkeleton />;
 
@@ -38,86 +39,21 @@ export default function GroupPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="My Group"
-        title={group ? `Group ${group.number}:` : "Form your"}
-        emphasis={group ? group.name : "group."}
+        title={group ? `Group ${group.number}:` : "Start your"}
+        emphasis={group ? group.name : "PBL group."}
         description={
           group
             ? group.projectTitle
-            : "Add your classmates by registration number. Once the group exists, the team lead registers your mentor with the signed PBL form."
+            : "Check your details, choose the supervisor who signed your application, then register your group and invite your teammates."
         }
         scene="group"
       />
       {group ? (
         <GroupView group={group} isLeader={isLeader} mentorCard={<MentorCard mentor={mentor} lastChange={supervisorChange} />} onChanged={refresh} />
       ) : (
-        <CreateGroupForm onCreated={refresh} myRegistration={student.registrationNumber} />
+        <GetStarted student={student} invitations={invitations} onDone={refresh} />
       )}
     </div>
-  );
-}
-
-/* ----------------------------------------------------------- create group */
-
-function CreateGroupForm({ onCreated, myRegistration }: { onCreated: () => void; myRegistration: string }) {
-  const [name, setName] = useState("");
-  const [title, setTitle] = useState("");
-  const [domain, setDomain] = useState("");
-  const [idea, setIdea] = useState("");
-  const [members, setMembers] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await repo.createGroup({
-        name: name.trim(),
-        projectTitle: title.trim(),
-        projectIdea: idea.trim(),
-        domain: domain.trim(),
-        memberRegistrationNumbers: members.split(/[\s,]+/).filter(Boolean),
-      });
-      onCreated();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not create the group.");
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader title="Create a group" description="You will be the team leader. Up to 5 students in total." />
-      <form onSubmit={submit}>
-        <CardBody className="grid gap-4 sm:grid-cols-2">
-          <Field label="Group name" htmlFor="g-name">
-            <Input id="g-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Team Kisan" />
-          </Field>
-          <Field label="Domain" htmlFor="g-domain">
-            <Input id="g-domain" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="e.g. Machine Learning" />
-          </Field>
-          <Field label="Project title" htmlFor="g-title" className="sm:col-span-2">
-            <Input id="g-title" required value={title} onChange={(e) => setTitle(e.target.value)} />
-          </Field>
-          <Field label="Project idea" htmlFor="g-idea" help="A short brief — your teacher sees it alongside the PBL form." className="sm:col-span-2">
-            <Textarea id="g-idea" rows={4} value={idea} onChange={(e) => setIdea(e.target.value)} />
-          </Field>
-          <Field
-            label="Members' registration numbers"
-            htmlFor="g-members"
-            help={`Separate with commas. You (${myRegistration}) are added automatically. Each student can be in only one group.`}
-            className="sm:col-span-2"
-          >
-            <Input id="g-members" value={members} onChange={(e) => setMembers(e.target.value)} placeholder="URN-2023-CSE-1302, URN-2023-CSE-1303" />
-          </Field>
-          {error ? <p role="alert" className="text-[13px] text-clay-500 sm:col-span-2">{error}</p> : null}
-          <div className="sm:col-span-2">
-            <Button type="submit" loading={busy}>Create group</Button>
-          </div>
-        </CardBody>
-      </form>
-    </Card>
   );
 }
 
@@ -157,6 +93,7 @@ function GroupView({
               </li>
             ))}
           </ul>
+          <InvitationsPanel isLeader={isLeader} memberCount={group.members.length} />
           {group.projectIdea ? (
             <CardBody className="border-t border-sand-200/60">
               <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-400 uppercase">Project idea</p>
@@ -401,5 +338,86 @@ function FormUpload({
         ) : null}
       </div>
     </form>
+  );
+}
+
+/* ------------------------------------------------------------ invitations */
+
+/** Classmates invited but not yet joined; the team lead can invite more. */
+function InvitationsPanel({ isLeader, memberCount }: { isLeader: boolean; memberCount: number }) {
+  const sent = useLoad(repo.listSentInvitations, `invites:${memberCount}`);
+  const [reg, setReg] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const pending = (sent.data ?? []).filter((i) => i.status === "pending");
+  const declined = (sent.data ?? []).filter((i) => i.status === "declined");
+  const room = 5 - memberCount - pending.length;
+
+  async function invite(event: FormEvent) {
+    event.preventDefault();
+    if (!reg.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await repo.inviteMember(reg.trim());
+      setReg("");
+      await sent.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not send the invitation.");
+    }
+    setBusy(false);
+  }
+
+  async function cancel(invitation: SentInvitation) {
+    try {
+      await repo.cancelInvitation(invitation.id);
+      await sent.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not withdraw the invitation.");
+    }
+  }
+
+  if (!isLeader && pending.length === 0) return null;
+
+  return (
+    <CardBody className="space-y-3 border-t border-sand-200/60">
+      {pending.length > 0 || declined.length > 0 ? (
+        <ul className="space-y-2">
+          {[...pending, ...declined].map((i) => (
+            <li key={i.id} className="flex flex-wrap items-center gap-2 text-[13px]">
+              <Hourglass className={i.status === "pending" ? "size-3.5 text-gold-500" : "size-3.5 text-stone-300"} />
+              <span className="text-ink-900">{i.fullName}</span>
+              <span className="tnum text-[12px] text-stone-400">{i.registrationNumber}</span>
+              <Badge tone={i.status === "pending" ? "gold" : "clay"}>
+                {i.status === "pending" ? (i.hasAccount ? "Invited" : "Invited · not signed up yet") : "Declined"}
+              </Badge>
+              {isLeader && i.status === "pending" ? (
+                <button type="button" onClick={() => void cancel(i)} className="text-[12px] text-stone-400 hover:text-clay-500">
+                  Withdraw
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {isLeader && room > 0 ? (
+        <form onSubmit={invite} className="flex flex-wrap gap-2">
+          <Input
+            value={reg}
+            onChange={(e) => setReg(e.target.value)}
+            inputMode="numeric"
+            placeholder="Teammate's registration number"
+            aria-label="Teammate's registration number"
+            className="max-w-xs"
+          />
+          <Button type="submit" size="sm" variant="secondary" loading={busy}>
+            <UserPlus className="size-3.5" />
+            Invite
+          </Button>
+        </form>
+      ) : null}
+      {error ? <p role="alert" className="text-[13px] text-clay-500">{error}</p> : null}
+    </CardBody>
   );
 }

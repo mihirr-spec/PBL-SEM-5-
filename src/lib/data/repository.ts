@@ -3,10 +3,12 @@ import type {
   Announcement,
   Faculty,
   Group,
+  GroupInvitation,
   GroupMember,
   MentorRequest,
   Notification,
   Role,
+  SentInvitation,
   Student,
   StudentGrade,
   SupervisorChange,
@@ -230,11 +232,108 @@ export async function loadUser(
   };
 }
 
+/** Students sign in with @muj.manipal.edu; teachers and the PBL office with @jaipur.manipal.edu. */
+export const STUDENT_DOMAIN = "@muj.manipal.edu";
+export const STAFF_DOMAIN = "@jaipur.manipal.edu";
+
+/** Null when the address is a university one, otherwise what is wrong with it. */
+export function checkUniversityEmail(email: string, kind?: "student" | "staff"): string | null {
+  const e = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+$/.test(e)) return "Enter your full university email address.";
+  const student = e.endsWith(STUDENT_DOMAIN);
+  const staff = e.endsWith(STAFF_DOMAIN);
+  if (kind === "student" && !student) return `Students use their ${STUDENT_DOMAIN} address.`;
+  if (kind === "staff" && !staff) return `Teachers and the PBL office use their ${STAFF_DOMAIN} address.`;
+  if (!student && !staff) return `Use your university email (${STUDENT_DOMAIN} or ${STAFF_DOMAIN}).`;
+  return null;
+}
+
+/** MUJ student addresses end in the registration number: name.2427010544@muj.manipal.edu. */
+export function registrationFromEmail(email: string): string | null {
+  const local = email.trim().toLowerCase().split("@")[0] ?? "";
+  return /(\d{6,})$/.exec(local)?.[1] ?? null;
+}
+
+export interface SignUpDetails {
+  email: string;
+  password: string;
+  /** Students only — used when the university roster has no record yet. */
+  fullName?: string;
+  registrationNumber?: string;
+  programme?: string;
+  branch?: string;
+  specialization?: string;
+  semester?: number;
+  section?: string;
+}
+
+/**
+ * Creates the account. Supabase emails a confirmation link; the account can
+ * sign in only after it is opened. The database decides the role from the
+ * address (see the sign-up trigger) and refuses anything that is not MUJ.
+ */
+export async function signUp(details: SignUpDetails): Promise<{ ok: true } | { ok: false; error: string }> {
+  const email = details.email.trim().toLowerCase();
+  const invalid = checkUniversityEmail(email);
+  if (invalid) return { ok: false, error: invalid };
+  if (details.password.length < 8) return { ok: false, error: "Use a password of at least 8 characters." };
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: details.password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/login?verified=1`,
+      data: {
+        full_name: details.fullName?.trim() ?? "",
+        registration_number: details.registrationNumber?.trim() ?? "",
+        programme: details.programme ?? "",
+        branch: details.branch ?? "",
+        specialization: details.specialization?.trim() ?? "",
+        semester: details.semester ? String(details.semester) : "",
+        section: details.section?.trim() ?? "",
+      },
+    },
+  });
+  if (error) {
+    // The sign-up trigger's own message does not reach the client.
+    if (/database error/i.test(error.message)) {
+      return {
+        ok: false,
+        error: email.endsWith(STAFF_DOMAIN)
+          ? "We could not find this address in the MUJ faculty list. Contact the PBL office."
+          : "We could not create this account — it may already be registered, or the registration number is taken.",
+      };
+    }
+    return { ok: false, error: error.message };
+  }
+  // With email confirmation on, an address that is already registered comes
+  // back as a user with no identities instead of an error.
+  if (data.user && (data.user.identities ?? []).length === 0) {
+    return { ok: false, error: "An account with this email already exists. Sign in instead." };
+  }
+  return { ok: true };
+}
+
+/** Sends the confirmation email again. */
+export async function resendConfirmation(email: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email.trim().toLowerCase(),
+    options: { emailRedirectTo: `${window.location.origin}/login?verified=1` },
+  });
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
 export async function authenticate({ email, password, roles }: Credentials): Promise<AuthResult> {
+  const invalid = checkUniversityEmail(email);
+  if (invalid) return { ok: false, error: invalid };
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
+    email: email.trim().toLowerCase(),
     password,
   });
+  if (error?.code === "email_not_confirmed") {
+    return { ok: false, error: "Verify your email first — open the link we sent to your inbox." };
+  }
   if (error || !data.user) {
     return { ok: false, error: "Incorrect email or password. Please try again." };
   }
@@ -407,6 +506,44 @@ export async function createGroup(input: {
   });
   fail(error);
   return data as string;
+}
+
+/* --------------------------------------------------------- invitations */
+
+/** Invitations waiting for the signed-in student. */
+export async function listMyInvitations(): Promise<GroupInvitation[]> {
+  const { data, error } = await supabase.rpc("my_invitations");
+  fail(error);
+  return (data ?? []) as GroupInvitation[];
+}
+
+/** Pending and declined invitations the signed-in student's group has sent. */
+export async function listSentInvitations(): Promise<SentInvitation[]> {
+  const { data, error } = await supabase.rpc("group_invitations");
+  fail(error);
+  return (data ?? []) as SentInvitation[];
+}
+
+/** Returns "accepted" or "declined". */
+export async function respondToInvitation(invitationId: string, accept: boolean): Promise<string> {
+  const { data, error } = await supabase.rpc("respond_to_invitation", {
+    p_invitation: invitationId,
+    p_accept: accept,
+  });
+  fail(error);
+  return data as string;
+}
+
+/** Team lead only. */
+export async function inviteMember(registrationNumber: string): Promise<void> {
+  const { error } = await supabase.rpc("invite_member", { p_reg: registrationNumber });
+  fail(error);
+}
+
+/** Team lead only. */
+export async function cancelInvitation(invitationId: string): Promise<void> {
+  const { error } = await supabase.rpc("cancel_invitation", { p_invitation: invitationId });
+  fail(error);
 }
 
 /* ----------------------------------------------------- mentor requests */

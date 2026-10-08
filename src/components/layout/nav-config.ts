@@ -3,6 +3,7 @@ import {
   Bell,
   BookUser,
   FileText,
+  Inbox,
   LayoutDashboard,
   Megaphone,
   MessageCircleQuestion,
@@ -20,7 +21,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   /** Key into the badge-count map supplied by the sidebar. */
-  badge?: "notifications";
+  badge?: "notifications" | "invitations";
   /** Also highlight for nested routes under this path (e.g. a group's page). */
   matchPrefix?: string;
 }
@@ -52,6 +53,7 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       items: [
         { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
         { label: "My Group & Mentor", href: "/student/group", icon: UsersRound },
+        { label: "Requests", href: "/student/requests", icon: Inbox, badge: "invitations" },
         { label: "Weekly Reports", href: "/student/reports", icon: FileText },
         { label: "Grades & Feedback", href: "/student/grades", icon: Award },
         { label: "Queries", href: "/student/queries", icon: MessageCircleQuestion },

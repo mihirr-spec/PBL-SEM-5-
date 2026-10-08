@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   AlertCircle,
   ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
   Landmark,
@@ -14,37 +16,46 @@ import {
 } from "lucide-react";
 
 import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
+import { checkUniversityEmail, resendConfirmation } from "@/lib/data/repository";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Shared password of the seeded demo accounts (supabase/migrations). */
+/** Password of the seeded demo student (supabase/migrations). */
 const DEMO_PASSWORD = "pbl@2026";
 
-/** One sign-in tab per kind of account, each with its demo login. */
+/** One sign-in tab per kind of account. Only students have a demo login. */
 const TABS = [
   {
     key: "student",
     label: "Student",
     roles: ["student"],
-    demoEmail: "mihir.sanghvi@university.edu.in",
+    kind: "student",
+    placeholder: "name.regno@muj.manipal.edu",
+    demoEmail: "mihir.2427010544@muj.manipal.edu",
   },
   {
     key: "teacher",
     label: "Teacher",
     roles: ["faculty", "supervisor"],
-    demoEmail: "a.deshpande@university.edu.in",
+    kind: "staff",
+    placeholder: "name@jaipur.manipal.edu",
+    demoEmail: null,
   },
   {
     key: "admin",
     label: "Administrator",
     roles: ["admin"],
-    demoEmail: "pbl.admin@university.edu.in",
+    kind: "staff",
+    placeholder: "name@jaipur.manipal.edu",
+    demoEmail: null,
   },
 ] as const satisfies ReadonlyArray<{
   key: string;
   label: string;
   roles: readonly Role[];
-  demoEmail: string;
+  kind: "student" | "staff";
+  placeholder: string;
+  demoEmail: string | null;
 }>;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -55,7 +66,8 @@ const control =
 const fieldIcon =
   "pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-ink-800";
 
-export function LoginForm() {
+/** `verified`: back from the confirmation link in the sign-up email. */
+export function LoginForm({ verified = false }: { verified?: boolean }) {
   const { signIn, user, loading } = useSession();
   const router = useRouter();
 
@@ -67,6 +79,10 @@ export function LoginForm() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [unverified, setUnverified] = useState(false);
+  const [notice, setNotice] = useState<string | null>(
+    verified ? "Email verified. Sign in to continue." : null,
+  );
 
   // Already signed in — go straight to the role's home.
   useEffect(() => {
@@ -78,6 +94,13 @@ export function LoginForm() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    setNotice(null);
+    setUnverified(false);
+    const invalid = checkUniversityEmail(email, tab.kind);
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
     setSubmitting(true);
 
     const result = await signIn(email, password, [...tab.roles]);
@@ -87,10 +110,23 @@ export function LoginForm() {
     }
 
     setError(result.error);
+    setUnverified(result.error.startsWith("Verify your email"));
     setSubmitting(false);
   }
 
+  async function resend() {
+    const result = await resendConfirmation(email);
+    setUnverified(false);
+    if (result.ok) {
+      setError(null);
+      setNotice(`We sent a new verification link to ${email.trim().toLowerCase()}.`);
+    } else {
+      setError(result.error);
+    }
+  }
+
   function fillDemo() {
+    if (!tab.demoEmail) return;
     setEmail(tab.demoEmail);
     setPassword(DEMO_PASSWORD);
     setError(null);
@@ -101,6 +137,7 @@ export function LoginForm() {
     setEmail("");
     setPassword("");
     setError(null);
+    setUnverified(false);
   }
 
   return (
@@ -135,7 +172,7 @@ export function LoginForm() {
             htmlFor="email"
             className="mb-1.5 block text-[14px] font-medium text-ink-900"
           >
-            University Email / ID
+            University Email
           </label>
           <div className="relative">
             <Mail className={fieldIcon} strokeWidth={1.6} aria-hidden />
@@ -143,7 +180,7 @@ export function LoginForm() {
               id="email"
               type="email"
               autoComplete="username"
-              placeholder="you@university.edu.in"
+              placeholder={tab.placeholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={control}
@@ -215,7 +252,24 @@ export function LoginForm() {
             className="flex items-start gap-2 rounded-lg bg-clay-100/80 px-3.5 py-3 text-[14px] text-clay-500"
           >
             <AlertCircle className="mt-px size-4 shrink-0" />
-            {error}
+            <span>
+              {error}
+              {unverified ? (
+                <button type="button" onClick={() => void resend()} className="ml-1 font-medium text-azure-600 underline">
+                  Resend the link
+                </button>
+              ) : null}
+            </span>
+          </p>
+        ) : null}
+
+        {notice ? (
+          <p
+            role="status"
+            className="flex items-start gap-2 rounded-lg bg-sage-100/80 px-3.5 py-3 text-[14px] text-sage-500"
+          >
+            <CheckCircle2 className="mt-px size-4 shrink-0" />
+            {notice}
           </p>
         ) : null}
 
@@ -259,16 +313,20 @@ export function LoginForm() {
 
       <div className="mt-4 text-center">
         <p className="text-[13.5px] text-stone-500">
-          Don&rsquo;t have access?{" "}
-          <span className="text-azure-600">Contact your PBL coordinator</span>
+          New to the portal?{" "}
+          <Link href="/signup" className="text-azure-600 hover:underline">
+            Create your account
+          </Link>
         </p>
-        <button
-          type="button"
-          onClick={fillDemo}
-          className="mt-3 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
-        >
-          Trying it out? Use the demo {tab.label.toLowerCase()} account
-        </button>
+        {tab.demoEmail ? (
+          <button
+            type="button"
+            onClick={fillDemo}
+            className="mt-3 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
+          >
+            Trying it out? Use the demo student account
+          </button>
+        ) : null}
       </div>
     </>
   );

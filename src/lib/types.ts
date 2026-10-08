@@ -91,6 +91,38 @@ export interface Group {
   members: GroupMember[];
 }
 
+/** An invitation waiting for the signed-in student, with what they need to decide. */
+export interface GroupInvitation {
+  id: string;
+  createdAt: string;
+  group: {
+    id: string;
+    number: number;
+    name: string;
+    projectTitle: string;
+    projectIdea: string;
+    domain: string;
+  };
+  leader: { fullName: string; registrationNumber: string; email: string };
+  members: Array<{ fullName: string; registrationNumber: string }>;
+  /** Set once a teacher has approved the group's mentor request. */
+  mentor: { fullName: string; designation: string; department: string; email: string } | null;
+  /** Teachers the group is still waiting on. */
+  requestedTeachers: string[];
+}
+
+/** An invitation the signed-in student's group has sent. */
+export interface SentInvitation {
+  id: string;
+  status: "pending" | "declined";
+  createdAt: string;
+  decidedAt?: string;
+  fullName: string;
+  registrationNumber: string;
+  /** False until the classmate has signed up — they see the invitation then. */
+  hasAccount: boolean;
+}
+
 export type RequestStatus = "pending" | "changes_requested" | "approved" | "rejected" | "closed";
 
 export interface MentorRequest {

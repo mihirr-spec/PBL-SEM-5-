@@ -21,12 +21,12 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { user, signOut } = useSession();
-  const { student, unreadCount } = usePortal();
+  const { student, unreadCount, invitations } = usePortal();
 
   if (!user) return null;
 
   const sections = NAV_BY_ROLE[user.role];
-  const counts = { notifications: unreadCount };
+  const counts = { notifications: unreadCount, invitations: invitations.length };
 
   return (
     <>

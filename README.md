@@ -20,10 +20,11 @@ Open http://localhost:3000.
 
 | Field | Value |
 | --- | --- |
-| Email | `mihir.sanghvi@university.edu.in` |
+| Email | `mihir.2427010544@muj.manipal.edu` |
 | Password | `pbl@2026` |
 
-The login screen has a "Fill these in" shortcut.
+New accounts sign up at `/signup` with a university email (students `@muj.manipal.edu`,
+teachers `@jaipur.manipal.edu`) and verify it from the emailed link. See `docs/PORTAL-GUIDE.md`.
 
 ---
 

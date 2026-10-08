@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { ArrowUpRight, Award, Bell, FileText, MessageCircleQuestion, UsersRound } from "lucide-react";
 
 import { NotificationIcon } from "@/components/notifications/notification-icon";
@@ -24,6 +26,14 @@ function greeting(fullName: string) {
 
 export default function DashboardPage() {
   const { loading, student, group, mentor, supervisorChange, notifications } = usePortal();
+  const router = useRouter();
+
+  // Until they are in a group, students start on the details → supervisor →
+  // application → group flow.
+  const needsGroup = !loading && student != null && group == null;
+  useEffect(() => {
+    if (needsGroup) router.replace("/student/group");
+  }, [needsGroup, router]);
 
   const { data } = useLoad(
     async () => {
@@ -37,7 +47,7 @@ export default function DashboardPage() {
     student ? `${student.id}:${group?.id ?? "none"}` : null,
   );
 
-  if (loading || !student) return <PageSkeleton />;
+  if (loading || !student || needsGroup) return <PageSkeleton />;
 
   const hello = greeting(student.fullName);
   const latestReport = data?.reports[0];

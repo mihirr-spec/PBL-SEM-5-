@@ -12,7 +12,7 @@ import {
 
 import { useSession } from "@/lib/auth/session";
 import * as repo from "@/lib/data/repository";
-import type { Faculty, Group, Notification, Student, SupervisorChange } from "@/lib/types";
+import type { Faculty, Group, GroupInvitation, Notification, Student, SupervisorChange } from "@/lib/types";
 
 /**
  * Loads what every page of the signed-in user's portal shares — the student
@@ -28,6 +28,8 @@ interface PortalData {
   mentor: Faculty | null;
   /** The group's most recent change of supervisor, if it ever had one. */
   supervisorChange: SupervisorChange | null;
+  /** Classmates' invitations to join their group, waiting for an answer. */
+  invitations: GroupInvitation[];
   notifications: Notification[];
 }
 
@@ -41,7 +43,14 @@ interface PortalContextValue extends PortalData {
   markAllRead: () => Promise<void>;
 }
 
-const empty: PortalData = { student: null, group: null, mentor: null, supervisorChange: null, notifications: [] };
+const empty: PortalData = {
+  student: null,
+  group: null,
+  mentor: null,
+  supervisorChange: null,
+  invitations: [],
+  notifications: [],
+};
 
 const PortalContext = createContext<PortalContextValue | null>(null);
 
@@ -52,11 +61,12 @@ async function loadPortal(userId: string): Promise<PortalData> {
   ]);
   if (!student) return { ...empty, notifications };
   const group = await repo.getGroupForStudent(student.id);
-  const [mentor, changes] = await Promise.all([
+  const [mentor, changes, invitations] = await Promise.all([
     repo.getFaculty(group?.mentorId ?? null),
     group ? repo.listSupervisorChanges(group.id) : Promise.resolve([]),
+    group ? Promise.resolve([]) : repo.listMyInvitations(),
   ]);
-  return { student, group, mentor, supervisorChange: changes[0] ?? null, notifications };
+  return { student, group, mentor, supervisorChange: changes[0] ?? null, invitations, notifications };
 }
 
 export function PortalProvider({ children }: { children: ReactNode }) {
