@@ -46,8 +46,8 @@ export default function LoginPage() {
       </header>
 
       {/* On wide screens the dialog sits in the open paper left of the
-          painting (centred on ~19vw); narrower screens centre it. */}
-      <main className="flex flex-1 items-center justify-center px-4 py-6 sm:px-6 wide:justify-start wide:pt-16 wide:pb-4 wide:pl-[max(2.5rem,calc(19vw-15.5rem))]">
+          painting (centred on ~24vw); narrower screens centre it. */}
+      <main className="flex flex-1 items-center justify-center px-4 py-6 sm:px-6 wide:justify-start wide:pt-16 wide:pb-4 wide:pl-[max(4rem,calc(24vw-15.5rem))]">
         <div
           role="dialog"
           aria-labelledby="signin-title"
