@@ -352,7 +352,7 @@ function InvitationsPanel({ isLeader, memberCount }: { isLeader: boolean; member
 
   const pending = (sent.data ?? []).filter((i) => i.status === "pending");
   const declined = (sent.data ?? []).filter((i) => i.status === "declined");
-  const room = 5 - memberCount - pending.length;
+  const room = 3 - memberCount - pending.length;
 
   async function invite(event: FormEvent) {
     event.preventDefault();

@@ -89,6 +89,13 @@ const toGroup = (r: any): Group => ({
   mentorId: r.mentor_id,
   assignedAt: r.assigned_at ?? undefined,
   createdAt: r.created_at,
+  reportCount: r.report_count ?? 5,
+  invited: r.group_invitations
+    ?.filter((i: any) => i.status === "pending")
+    .map((i: any) => ({
+      fullName: i.students?.full_name ?? "Student",
+      registrationNumber: i.students?.registration_number ?? "",
+    })),
   members: (r.group_members ?? [])
     .map(
       (m: any): GroupMember => ({
@@ -324,9 +331,9 @@ export async function resendConfirmation(email: string): Promise<{ ok: true } | 
   return error ? { ok: false, error: error.message } : { ok: true };
 }
 
+// No address check here: the database only has accounts it accepted, and the
+// demo logins use test addresses. Sign-up enforces the MUJ domains.
 export async function authenticate({ email, password, roles }: Credentials): Promise<AuthResult> {
-  const invalid = checkUniversityEmail(email);
-  if (invalid) return { ok: false, error: invalid };
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password,
@@ -490,19 +497,21 @@ export async function listGroups(
   return (data ?? []).map((r: any) => ({ ...toGroup(r), mentorName: r.mentor?.full_name ?? undefined }));
 }
 
+/** The caller becomes team lead; each teammate (name + registration number) is invited. */
 export async function createGroup(input: {
   name: string;
   projectTitle: string;
   projectIdea: string;
   domain: string;
-  memberRegistrationNumbers: string[];
+  teammates: Array<{ fullName: string; registrationNumber: string }>;
 }): Promise<string> {
   const { data, error } = await supabase.rpc("create_group", {
     p_name: input.name,
     p_project_title: input.projectTitle,
     p_project_idea: input.projectIdea,
     p_domain: input.domain,
-    p_member_regs: input.memberRegistrationNumbers,
+    p_member_regs: input.teammates.map((t) => t.registrationNumber),
+    p_member_names: input.teammates.map((t) => t.fullName),
   });
   fail(error);
   return data as string;
@@ -583,7 +592,7 @@ export async function listRequestsForFaculty(
 ): Promise<Array<MentorRequest & { group: Group | null }>> {
   const { data, error } = await supabase
     .from("mentor_requests")
-    .select(`*, groups(${GROUP_SELECT})`)
+    .select(`*, groups(${GROUP_SELECT}, group_invitations(status, students(full_name, registration_number)))`)
     .eq("faculty_id", facultyId)
     .order("created_at", { ascending: false });
   fail(error);
@@ -713,6 +722,12 @@ export async function submitReport(input: {
         submitted_by: input.studentId,
         ...file,
       });
+  fail(error);
+}
+
+/** Supervisor or PBL office: how many weekly reports the group owes. */
+export async function setReportCount(groupId: string, count: number): Promise<void> {
+  const { error } = await supabase.rpc("set_report_count", { p_group: groupId, p_count: count });
   fail(error);
 }
 

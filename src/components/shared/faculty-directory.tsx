@@ -44,7 +44,9 @@ export function FacultyDirectory({
           f.fullName.toLowerCase().includes(q) ||
           f.expertise.toLowerCase().includes(q) ||
           f.email.toLowerCase().includes(q)),
-    );
+    )
+      // Teachers on the portal first — they can act on a request straight away.
+      .sort((a, b) => Number(b.onPortal) - Number(a.onPortal));
   }, [data, query, department]);
 
   if (error) return <Card><EmptyState title="Could not load the directory" description={error} /></Card>;

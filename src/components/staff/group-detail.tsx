@@ -136,16 +136,25 @@ export function GroupDetail({ groupId, isAdmin = false }: { groupId: string; isA
 
       {/* ------------------------- weekly reports ------------------------ */}
       <Card>
-        <CardHeader title="Weekly reports" description="Grade out of 10 with feedback. Students are notified." />
-        {reports.length === 0 ? (
-          <EmptyState icon={<FileText className="size-5" />} title="No reports submitted yet" />
-        ) : (
-          <ul className="divide-y divide-sand-200/70">
-            {reports.map((r) => (
+        <CardHeader
+          title="Weekly reports"
+          description={`${reports.filter((r) => r.week <= group.reportCount).length} of ${group.reportCount} submitted. Grade out of 10 with feedback — students are notified.`}
+          action={<ReportCountPicker groupId={group.id} value={group.reportCount} onChanged={reload} />}
+        />
+        <ul className="divide-y divide-sand-200/70">
+          {Array.from({ length: group.reportCount }, (_, i) => i + 1).map((week) => {
+            const r = reports.find((x) => x.week === week);
+            return r ? (
               <ReportRow key={r.id} report={r} onGraded={reload} />
-            ))}
-          </ul>
-        )}
+            ) : (
+              <li key={week} className="flex items-center gap-2 px-5 py-3">
+                <FileText className="size-4 text-stone-300" />
+                <span className="font-display text-[15px] text-stone-500">Week {week}</span>
+                <span className="rounded-full bg-gold-50 px-2 py-0.5 text-[11px] font-semibold text-gold-600">Pending</span>
+              </li>
+            );
+          })}
+        </ul>
       </Card>
 
       {/* ----------------------------- queries ---------------------------- */}
@@ -260,6 +269,34 @@ function StudentRow({
         </form>
       ) : null}
     </li>
+  );
+}
+
+/** How many weekly reports the group owes: 5 or 6. */
+function ReportCountPicker({ groupId, value, onChanged }: { groupId: string; value: number; onChanged: () => void }) {
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <label className="flex items-center gap-2 text-[12.5px] text-stone-500">
+      Reports due
+      <select
+        value={value}
+        onChange={async (e) => {
+          setError(null);
+          try {
+            await repo.setReportCount(groupId, Number(e.target.value));
+            onChanged();
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Could not change it.");
+          }
+        }}
+        className="rounded-lg border border-white/80 bg-white/75 px-2 py-1 text-[13px] text-ink-900"
+      >
+        {[5, 6].includes(value) ? null : <option value={value}>{value}</option>}
+        <option value={5}>5</option>
+        <option value={6}>6</option>
+      </select>
+      {error ? <span className="text-clay-500">{error}</span> : null}
+    </label>
   );
 }
 

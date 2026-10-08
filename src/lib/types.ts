@@ -88,7 +88,11 @@ export interface Group {
   mentorId: string | null;
   assignedAt?: string;
   createdAt: string;
+  /** How many weekly reports the group owes (5 by default, set by the supervisor). */
+  reportCount: number;
   members: GroupMember[];
+  /** Teammates invited but not joined yet (staff views). */
+  invited?: Array<{ fullName: string; registrationNumber: string }>;
 }
 
 /** An invitation waiting for the signed-in student, with what they need to decide. */

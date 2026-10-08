@@ -16,46 +16,46 @@ import {
 } from "lucide-react";
 
 import { HOME_BY_ROLE, useSession } from "@/lib/auth/session";
-import { checkUniversityEmail, resendConfirmation } from "@/lib/data/repository";
+import { resendConfirmation } from "@/lib/data/repository";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Password of the seeded demo student (supabase/migrations). */
-const DEMO_PASSWORD = "pbl@2026";
-
-/** One sign-in tab per kind of account. Only students have a demo login. */
+/** One sign-in tab per kind of account, each with its demo logins (supabase/migrations). */
 const TABS = [
   {
     key: "student",
     label: "Student",
     roles: ["student"],
-    kind: "student",
     placeholder: "name.regno@muj.manipal.edu",
-    demoEmail: "mihir.2427010544@muj.manipal.edu",
+    demos: [
+      { label: "Mihir (test)", email: "mihirtest@university.edu", password: "123" },
+      { label: "Krishna (test)", email: "krishnatest@university.edu", password: "123" },
+      { label: "Sample data", email: "mihir.sanghvi@university.edu.in", password: "pbl@2026" },
+    ],
   },
   {
     key: "teacher",
     label: "Teacher",
     roles: ["faculty", "supervisor"],
-    kind: "staff",
     placeholder: "name@jaipur.manipal.edu",
-    demoEmail: null,
+    demos: [
+      { label: "Test Supervisor", email: "testsupervisor@muj.manipal.edu", password: "123" },
+      { label: "Sample data", email: "a.deshpande@university.edu.in", password: "pbl@2026" },
+    ],
   },
   {
     key: "admin",
     label: "Administrator",
     roles: ["admin"],
-    kind: "staff",
     placeholder: "name@jaipur.manipal.edu",
-    demoEmail: null,
+    demos: [{ label: "PBL Office (sample data)", email: "pbl.admin@university.edu.in", password: "pbl@2026" }],
   },
 ] as const satisfies ReadonlyArray<{
   key: string;
   label: string;
   roles: readonly Role[];
-  kind: "student" | "staff";
   placeholder: string;
-  demoEmail: string | null;
+  demos: ReadonlyArray<{ label: string; email: string; password: string }>;
 }>;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -96,11 +96,6 @@ export function LoginForm({ verified = false }: { verified?: boolean }) {
     setError(null);
     setNotice(null);
     setUnverified(false);
-    const invalid = checkUniversityEmail(email, tab.kind);
-    if (invalid) {
-      setError(invalid);
-      return;
-    }
     setSubmitting(true);
 
     const result = await signIn(email, password, [...tab.roles]);
@@ -125,10 +120,9 @@ export function LoginForm({ verified = false }: { verified?: boolean }) {
     }
   }
 
-  function fillDemo() {
-    if (!tab.demoEmail) return;
-    setEmail(tab.demoEmail);
-    setPassword(DEMO_PASSWORD);
+  function fillDemo(demo: { email: string; password: string }) {
+    setEmail(demo.email);
+    setPassword(demo.password);
     setError(null);
   }
 
@@ -318,15 +312,18 @@ export function LoginForm({ verified = false }: { verified?: boolean }) {
             Create your account
           </Link>
         </p>
-        {tab.demoEmail ? (
-          <button
-            type="button"
-            onClick={fillDemo}
-            className="mt-3 rounded-full border border-[#dbe3ee] bg-white/70 px-4 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
-          >
-            Trying it out? Use the demo student account
-          </button>
-        ) : null}
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {tab.demos.map((demo) => (
+            <button
+              key={demo.email}
+              type="button"
+              onClick={() => fillDemo(demo)}
+              className="rounded-full border border-[#dbe3ee] bg-white/70 px-3.5 py-1.5 text-[12.5px] text-stone-500 transition-colors hover:border-azure-100 hover:text-azure-600"
+            >
+              Demo: {demo.label}
+            </button>
+          ))}
+        </div>
       </div>
     </>
   );

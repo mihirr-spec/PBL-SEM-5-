@@ -171,6 +171,13 @@ function RequestCard({ request, onDecided }: { request: Request; onDecided: () =
                     <span className="tnum text-stone-400">{m.registrationNumber}</span>
                   </li>
                 ))}
+                {(group.invited ?? []).map((m) => (
+                  <li key={m.registrationNumber} className="flex items-center gap-1.5 rounded-full bg-white/50 px-3 py-1 text-[12.5px] text-stone-600 ring-1 ring-white" title="Invited — joins once they accept">
+                    {m.fullName}
+                    <span className="tnum text-stone-400">{m.registrationNumber}</span>
+                    <span className="text-[11px] text-gold-600">invited</span>
+                  </li>
+                ))}
               </ul>
             </div>
           ) : null}
