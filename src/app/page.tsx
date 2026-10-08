@@ -9,7 +9,6 @@ import {
   FolderKanban,
   GraduationCap,
   LineChart,
-  ShieldCheck,
   UsersRound,
 } from "lucide-react";
 
@@ -90,14 +89,6 @@ const AUDIENCES = [
     title: "Administrators",
     body: "Oversee PBL activities, manage timelines, announcements and system-wide operations.",
   },
-] as const;
-
-const ROADMAP = [
-  { tag: "V1", label: "Student, teacher and PBL office portals", note: "Live", live: true },
-  { tag: "V1.1", label: "University single sign-on", live: false },
-  { tag: "V1.2", label: "Portal accounts for every MUJ teacher", live: false },
-  { tag: "V2", label: "Review rubrics and final marks", live: false },
-  { tag: "V3", label: "Project health and early-warning analytics", live: false },
 ] as const;
 
 /** Two-tone uppercase label that opens each marketing section. */
@@ -425,85 +416,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ----------------------------- roadmap --------------------------- */}
-      <section className="border-y border-sand-200 bg-ivory-50">
-        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-          <div>
-            <Doodle name="bulb" className="mb-4 w-10 opacity-80" />
-            <h2 className="font-display text-[1.9rem] leading-tight tracking-tight text-ink-900">
-              Designed to grow, not to be rebuilt
+      {/* ------------------------------- cta ----------------------------- */}
+      <section className="px-5 pt-6 pb-20 sm:px-8">
+        <div className="relative isolate mx-auto grid max-w-6xl overflow-hidden rounded-[32px] border border-white bg-white/80 shadow-[0_40px_90px_-50px_rgba(13,31,63,0.55)] md:grid-cols-[1.1fr_1fr]">
+          <div className="px-7 py-12 sm:px-12 sm:py-14">
+            <Eyebrow lead="Ready" emphasis="When Your Team Is" />
+            <h2 className="mt-4 font-display text-[2rem] leading-[1.1] tracking-tight text-ink-900 sm:text-[2.5rem]">
+              Your group, your mentor,
+              <span className="block text-azure-600">your progress.</span>
             </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-stone-600">
-              Roles, routes and data access are separated from the first commit,
-              so each release adds a module rather than reworking the ones
-              already in use.
+            <p className="mt-4 max-w-md text-[14.5px] leading-relaxed text-stone-600">
+              Sign in with your university email to form your group, register
+              your mentor and submit this week&rsquo;s report.
             </p>
-            <p className="mt-6 flex items-center gap-2 text-[13px] text-stone-500">
-              <ShieldCheck className="size-4 text-sage-500" aria-hidden />
-              Academic records stay read-only to students by design
-            </p>
+            <ButtonLink
+              href="/login"
+              size="lg"
+              className="mt-8 bg-ink-800 px-8 text-white shadow-[0_14px_30px_-16px_rgba(13,31,63,0.95)] hover:bg-ink-700 active:bg-ink-900"
+            >
+              Sign in
+              <ArrowRight className="size-4" />
+            </ButtonLink>
           </div>
 
-          <ol className="space-y-3">
-            {ROADMAP.map((item) => (
-              <li
-                key={item.tag}
-                className="flex items-center gap-4 rounded-xl border border-sand-200 bg-white px-4 py-3"
-              >
-                <span className="tnum w-11 shrink-0 text-[12px] font-bold tracking-wide text-azure-600">
-                  {item.tag}
-                </span>
-                <span className="flex-1 text-[13.5px] text-stone-700">
-                  {item.label}
-                </span>
-                {item.live ? (
-                  <span className="rounded-full bg-sage-100 px-2.5 py-1 text-[10.5px] font-semibold text-sage-500">
-                    {item.note}
-                  </span>
-                ) : (
-                  <LineChart className="size-4 text-sand-300" aria-hidden />
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ------------------------------- cta ----------------------------- */}
-      <section className="relative isolate overflow-hidden px-5 py-20 text-center sm:px-8">
-        <Doodle
-          name="books"
-          className="absolute bottom-0 left-0 -z-10 hidden w-64 opacity-85 lg:block xl:w-72"
-        />
-        <CampusAccent
-          side="right"
-          art="painting"
-          className="[&_img]:opacity-80"
-        />
-        <Doodle
-          name="plane"
-          className="absolute top-16 left-[30%] -z-10 hidden w-9 opacity-70 sm:block"
-        />
-
-        <div className="mx-auto max-w-2xl">
-          <Eyebrow lead="Ready" emphasis="When Your Team Is" />
-          <h2 className="mt-4 font-display text-[1.9rem] leading-tight tracking-tight text-ink-900 sm:text-[2.3rem]">
-            Your group, your mentor, your progress
-            <span className="block text-azure-600">all in one place.</span>
-          </h2>
-          <p className="mt-3 text-[14.5px] text-stone-600">
-            Sign in with your university email to form your group, register
-            your mentor and submit this week&rsquo;s report.
-          </p>
-
-          <ButtonLink
-            href="/login"
-            size="lg"
-            className="mt-8 bg-ink-800 px-8 text-white shadow-[0_14px_30px_-16px_rgba(13,31,63,0.95)] hover:bg-ink-700 active:bg-ink-900"
-          >
-            Sign In
-            <ArrowRight className="size-4" />
-          </ButtonLink>
+          {/* The campus painting fills the card's right half */}
+          <div className="relative min-h-56 md:min-h-0" aria-hidden>
+            <Image
+              src="/art/login-bg.webp"
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 560px"
+              className="object-cover object-[78%_70%] md:[mask-image:linear-gradient(to_right,transparent_0%,black_28%)]"
+            />
+          </div>
         </div>
       </section>
 
