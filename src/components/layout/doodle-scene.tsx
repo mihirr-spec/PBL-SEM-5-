@@ -12,7 +12,7 @@ const SCENES = {
   group: { doodles: ["cluster", "bulb", "plane"], tone: "azure" },
   reports: { doodles: ["books", "pencil", "plane"], tone: "gold" },
   grades: { doodles: ["book", "bulb", "triangle"], tone: "sage" },
-  tickets: { doodles: ["globe", "plane", "pencil"], tone: "clay" },
+  queries: { doodles: ["globe", "plane", "pencil"], tone: "clay" },
   notifications: { doodles: ["globe", "plane", "bulb"], tone: "azure" },
   directory: { doodles: ["books", "globe", "pencil"], tone: "azure" },
   requests: { doodles: ["book", "pencil", "triangle"], tone: "gold" },

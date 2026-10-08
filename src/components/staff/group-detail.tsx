@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Award, Crown, FileText, LifeBuoy, Mail } from "lucide-react";
+import { ArrowRightLeft, Award, Crown, FileText, Mail, MessageCircleQuestion } from "lucide-react";
 
 import { FileLink } from "@/components/shared/file-link";
-import { TicketList } from "@/components/shared/tickets";
+import { QueryList } from "@/components/shared/queries";
+import { ChangeSupervisorForm, SupervisorHistory } from "@/components/staff/supervisor-change";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, EmptyState } from "@/components/ui/card";
@@ -20,23 +21,28 @@ import { formatDateTime, timeAgo } from "@/lib/utils";
 async function loadGroupDetail(groupId: string) {
   const group = await repo.getGroup(groupId);
   if (!group) throw new Error("This group does not exist or is not visible to you.");
-  const [mentor, reports, grades, tickets] = await Promise.all([
+  const [mentor, reports, grades, tickets, changes] = await Promise.all([
     repo.getFaculty(group.mentorId),
     repo.listReports(group.id),
     repo.listGrades(group.members.map((m) => m.studentId)),
     repo.listTickets(group.id),
+    repo.listSupervisorChanges(group.id),
   ]);
-  return { group, mentor, reports, grades, tickets };
+  return { group, mentor, reports, grades, tickets, changes };
 }
 
-/** Everything about one team, for its supervisor (and admins). */
-export function GroupDetail({ groupId }: { groupId: string }) {
+/**
+ * Everything about one team, for its supervisor and the PBL office. The PBL
+ * office (`isAdmin`) can also move the group to another supervisor.
+ */
+export function GroupDetail({ groupId, isAdmin = false }: { groupId: string; isAdmin?: boolean }) {
+  const [changing, setChanging] = useState(false);
   const { data, error, reload } = useLoad(() => loadGroupDetail(groupId), groupId);
 
   if (error) return <Card><EmptyState title="Could not load this group" description={error} /></Card>;
   if (!data) return <PageSkeleton />;
 
-  const { group, mentor, reports, grades, tickets } = data;
+  const { group, mentor, reports, grades, tickets, changes } = data;
 
   return (
     <div className="space-y-6">
@@ -68,11 +74,49 @@ export function GroupDetail({ groupId }: { groupId: string }) {
           <CardBody className="space-y-2 text-[13px] text-stone-600">
             <p><span className="tnum font-semibold text-ink-900">{group.members.length}</span> students</p>
             <p><span className="tnum font-semibold text-ink-900">{reports.length}</span> weekly reports · {reports.filter((r) => r.grade == null).length} awaiting grade</p>
-            <p><span className="tnum font-semibold text-ink-900">{tickets.filter((t) => t.status === "open").length}</span> open tickets</p>
+            <p><span className="tnum font-semibold text-ink-900">{tickets.filter((t) => t.status === "open").length}</span> open queries</p>
             {group.assignedAt ? <p>Supervising since {formatDateTime(group.assignedAt)}</p> : null}
           </CardBody>
         </Card>
       </div>
+
+      {/* -------------------------- supervisor --------------------------- */}
+      {isAdmin || changes.length > 0 ? (
+        <Card>
+          <CardHeader
+            title="Supervisor"
+            description={
+              mentor
+                ? `Currently ${mentor.fullName}${changes.length > 0 ? ` · changed ${changes.length} time${changes.length > 1 ? "s" : ""}` : ""}`
+                : "No supervisor yet"
+            }
+            action={
+              isAdmin && !changing ? (
+                <Button size="sm" variant="secondary" onClick={() => setChanging(true)}>
+                  <ArrowRightLeft className="size-3.5" />
+                  Change supervisor
+                </Button>
+              ) : null
+            }
+          />
+          {isAdmin && changing ? (
+            <div className="px-5 pb-4">
+              <ChangeSupervisorForm
+                groupId={group.id}
+                currentMentorId={group.mentorId}
+                onDone={() => {
+                  setChanging(false);
+                  void reload();
+                }}
+              />
+              <button type="button" onClick={() => setChanging(false)} className="mt-2 text-[12.5px] text-stone-500 hover:text-ink-800">
+                Cancel
+              </button>
+            </div>
+          ) : null}
+          {changes.length > 0 ? <SupervisorHistory changes={changes} /> : null}
+        </Card>
+      ) : null}
 
       {/* --------------------------- students --------------------------- */}
       <Card>
@@ -104,13 +148,13 @@ export function GroupDetail({ groupId }: { groupId: string }) {
         )}
       </Card>
 
-      {/* ----------------------------- tickets ---------------------------- */}
+      {/* ----------------------------- queries ---------------------------- */}
       <Card>
-        <CardHeader title="Tickets from this group" />
+        <CardHeader title="Queries from this group" />
         {tickets.length === 0 ? (
-          <EmptyState icon={<LifeBuoy className="size-5" />} title="No tickets raised" />
+          <EmptyState icon={<MessageCircleQuestion className="size-5" />} title="No queries raised" scene="queries" />
         ) : (
-          <TicketList tickets={tickets} canReply onChanged={reload} />
+          <QueryList queries={tickets} canReply={!isAdmin} onChanged={reload} />
         )}
       </Card>
     </div>

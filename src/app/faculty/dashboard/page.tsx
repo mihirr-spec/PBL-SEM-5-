@@ -1,10 +1,12 @@
 "use client";
 
-import { FileText, LifeBuoy, UserPlus, UsersRound } from "lucide-react";
+import { FileText, MessageCircleQuestion, UserPlus, UsersRound } from "lucide-react";
 
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { GroupTable } from "@/components/staff/group-table";
+import { SupervisorHistory } from "@/components/staff/supervisor-change";
 import { ButtonLink } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 import { DashboardHero } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth/session";
@@ -16,11 +18,13 @@ const MAX_GROUPS = 7;
 export default function FacultyDashboardPage() {
   const { user } = useSession();
   const { data } = useLoad(async () => {
-    const [groups, requests, ungraded, tickets] = await Promise.all([
+    const [groups, requests, ungraded, tickets, changes] = await Promise.all([
       repo.listGroups(user!.profileId),
       repo.listRequestsForFaculty(user!.profileId),
       repo.countUngradedReports(),
       repo.listTickets(),
+      // Only changes involving this teacher are visible to them.
+      repo.listSupervisorChanges(),
     ]);
     const openTickets: Record<string, number> = {};
     for (const t of tickets) if (t.status === "open") openTickets[t.groupId] = (openTickets[t.groupId] ?? 0) + 1;
@@ -29,6 +33,7 @@ export default function FacultyDashboardPage() {
       pendingRequests: requests.filter((r) => r.status === "pending").length,
       ungraded,
       openTickets,
+      changes,
     };
   }, user ? user.id : null);
 
@@ -43,7 +48,7 @@ export default function FacultyDashboardPage() {
         eyebrow="Supervisor"
         title="Welcome,"
         emphasis={`${user.displayName}.`}
-        description="Your PBL groups this semester. Open a group to see the whole team, grade reports and students, and answer tickets."
+        description="Your PBL groups this semester. Open a group to see the whole team, grade reports and students, and answer queries."
         image="campus"
         imageClassName="object-[center_40%]"
         action={
@@ -60,7 +65,7 @@ export default function FacultyDashboardPage() {
         <StatTile icon={UsersRound} label="Groups" value={`${data.groups.length}/${MAX_GROUPS}`} caption="Supervising" doodle="book" />
         <StatTile icon={UserPlus} label="Requests" value={data.pendingRequests} caption="Waiting for your decision" tone="sage" doodle="pencil" />
         <StatTile icon={FileText} label="Reports to grade" value={ungradedTotal} caption="Across your groups" tone="gold" doodle="books" />
-        <StatTile icon={LifeBuoy} label="Open tickets" value={ticketTotal} caption="From your students" tone={ticketTotal > 0 ? "clay" : "neutral"} doodle="globe" />
+        <StatTile icon={MessageCircleQuestion} label="Open queries" value={ticketTotal} caption="From your students" tone={ticketTotal > 0 ? "clay" : "neutral"} doodle="globe" />
       </div>
 
       <GroupTable
@@ -71,6 +76,16 @@ export default function FacultyDashboardPage() {
         pendingReports={data.ungraded}
         openTickets={data.openTickets}
       />
+
+      {data.changes.length > 0 ? (
+        <Card>
+          <CardHeader
+            title="Supervisor changes"
+            description="Groups the PBL office moved to you or away from you, with the reason."
+          />
+          <SupervisorHistory changes={data.changes.slice(0, 6)} showGroup viewerFacultyId={user.profileId} />
+        </Card>
+      ) : null}
     </div>
   );
 }

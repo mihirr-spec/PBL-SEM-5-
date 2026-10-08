@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { GraduationCap, LifeBuoy, Shuffle, UserX, UsersRound } from "lucide-react";
+import { GraduationCap, MessageCircleQuestion, Shuffle, UserX, UsersRound } from "lucide-react";
 
 import { StatTile } from "@/components/dashboard/stat-tile";
+import { QueryList } from "@/components/shared/queries";
 import { GroupTable } from "@/components/staff/group-table";
+import { ChangeSupervisorForm, SupervisorHistory } from "@/components/staff/supervisor-change";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, EmptyState } from "@/components/ui/card";
 import { DashboardHero } from "@/components/ui/page-header";
@@ -14,12 +16,16 @@ import { useLoad } from "@/lib/use-load";
 
 export default function AdminDashboardPage() {
   const { data, reload } = useLoad(async () => {
-    const [overview, groups, ungrouped] = await Promise.all([
+    const [overview, groups, ungrouped, queries, changes] = await Promise.all([
       repo.getOverview(),
       repo.listGroups(),
       repo.listUngroupedStudents(),
+      repo.listTickets(),
+      repo.listSupervisorChanges(),
     ]);
-    return { overview, groups, ungrouped };
+    // Change-of-supervisor requests the supervisor has approved: the PBL office decides.
+    const waiting = queries.filter((q) => q.category === "supervisor_change" && q.status === "forwarded");
+    return { overview, groups, ungrouped, waiting, changes };
   }, "admin");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -43,7 +49,7 @@ export default function AdminDashboardPage() {
   }
 
   if (!data) return <PageSkeleton />;
-  const { overview, groups, ungrouped } = data;
+  const { overview, groups, ungrouped, waiting, changes } = data;
 
   return (
     <div className="space-y-6">
@@ -60,7 +66,7 @@ export default function AdminDashboardPage() {
         <StatTile icon={GraduationCap} label="Students" value={overview.students} caption={`${ungrouped.length} not in a group`} doodle="books" />
         <StatTile icon={UsersRound} label="Groups" value={overview.groups} caption={`${overview.teachersOnPortal} teachers on the portal`} tone="sage" doodle="globe" />
         <StatTile icon={UserX} label="Without supervisor" value={overview.unassignedGroups} caption="Waiting for a mentor" tone={overview.unassignedGroups > 0 ? "gold" : "sage"} doodle="bulb" />
-        <StatTile icon={LifeBuoy} label="Open tickets" value={overview.openTickets} caption="Across all groups" tone={overview.openTickets > 0 ? "clay" : "neutral"} doodle="plane" />
+        <StatTile icon={MessageCircleQuestion} label="Open queries" value={overview.openTickets} caption="Across all groups" tone={overview.openTickets > 0 ? "clay" : "neutral"} doodle="plane" />
       </div>
 
       <Card>
@@ -77,7 +83,38 @@ export default function AdminDashboardPage() {
         {message ? <p className="px-5 py-3 text-[13px] text-ink-800">{message}</p> : null}
       </Card>
 
+      {waiting.length > 0 ? (
+        <Card className="ring-2 ring-azure-100">
+          <CardHeader
+            title={`Supervisor change requests (${waiting.length})`}
+            description="Approved by the group's current supervisor. Choose the new supervisor — the student's reason is filled in — or decline."
+          />
+          <QueryList
+            queries={waiting}
+            action={(q) => {
+              const group = groups.find((g) => g.id === q.groupId);
+              return (
+                <ChangeSupervisorForm
+                  groupId={q.groupId}
+                  currentMentorId={group?.mentorId ?? null}
+                  queryId={q.id}
+                  defaultReason={q.body}
+                  onDone={() => void reload()}
+                />
+              );
+            }}
+          />
+        </Card>
+      ) : null}
+
       <GroupTable title="All groups" groups={groups} hrefBase="/admin/groups" showMentor />
+
+      {changes.length > 0 ? (
+        <Card>
+          <CardHeader title="Recent supervisor changes" description="Open a group to change its supervisor." />
+          <SupervisorHistory changes={changes.slice(0, 8)} showGroup />
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader title="Students not in a group" description="They need to form or join a group before a supervisor can be allotted." />

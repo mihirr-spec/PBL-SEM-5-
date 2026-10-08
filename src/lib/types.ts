@@ -61,6 +61,8 @@ export interface Faculty {
   profileUrl?: string;
   /** True when this teacher has a portal login (can approve requests, grade). */
   onPortal: boolean;
+  /** Most groups this teacher may supervise. */
+  maxGroups: number;
   avatarUrl?: string;
 }
 
@@ -134,7 +136,11 @@ export interface StudentGrade {
   createdAt: string;
 }
 
-export type TicketStatus = "open" | "resolved";
+/** open = with the supervisor; forwarded = with the PBL office. */
+export type TicketStatus = "open" | "forwarded" | "resolved" | "declined";
+
+/** A query is general, or a request to change the group's supervisor. */
+export type TicketCategory = "general" | "supervisor_change";
 
 export interface Ticket {
   id: string;
@@ -144,10 +150,32 @@ export interface Ticket {
   studentName?: string;
   subject: string;
   body: string;
+  category: TicketCategory;
   status: TicketStatus;
+  /** The supervisor's reply (or their note when reviewing a change request). */
   reply?: string;
   createdAt: string;
   repliedAt?: string;
+  forwardedAt?: string;
+  /** The PBL office's answer to a change-of-supervisor request. */
+  adminReply?: string;
+  adminRepliedAt?: string;
+}
+
+/** One move of a group from one supervisor to another, with the reason. */
+export interface SupervisorChange {
+  id: string;
+  groupId: string;
+  groupNumber?: number;
+  groupName?: string;
+  fromFacultyId?: string;
+  fromName?: string;
+  toFacultyId: string;
+  toName: string;
+  reason: string;
+  /** Set when the change came from a student's change-of-supervisor query. */
+  queryId?: string;
+  createdAt: string;
 }
 
 export interface Announcement {

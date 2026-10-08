@@ -4,8 +4,8 @@ import {
   BookUser,
   FileText,
   LayoutDashboard,
-  LifeBuoy,
   Megaphone,
+  MessageCircleQuestion,
   Settings,
   UserPlus,
   UserRound,
@@ -35,7 +35,7 @@ const teacherNav: NavSection[] = [
     items: [
       { label: "My Groups", href: "/faculty/dashboard", icon: UsersRound, matchPrefix: "/faculty/groups" },
       { label: "Mentor Requests", href: "/faculty/requests", icon: UserPlus },
-      { label: "Tickets", href: "/faculty/tickets", icon: LifeBuoy },
+      { label: "Queries", href: "/faculty/queries", icon: MessageCircleQuestion },
       { label: "Announcements", href: "/faculty/announcements", icon: Megaphone },
     ],
   },
@@ -54,7 +54,7 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
         { label: "My Group & Mentor", href: "/student/group", icon: UsersRound },
         { label: "Weekly Reports", href: "/student/reports", icon: FileText },
         { label: "Grades & Feedback", href: "/student/grades", icon: Award },
-        { label: "Tickets", href: "/student/tickets", icon: LifeBuoy },
+        { label: "Queries", href: "/student/queries", icon: MessageCircleQuestion },
       ],
     },
     {

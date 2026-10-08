@@ -24,7 +24,7 @@ export function GroupTable({
   showMentor?: boolean;
   /** group id → reports awaiting a grade */
   pendingReports?: Record<string, number>;
-  /** group id → open tickets */
+  /** group id → open queries */
   openTickets?: Record<string, number>;
 }) {
   return (
@@ -85,7 +85,7 @@ export function GroupTable({
                         <span className="text-ink-900">
                           {reports > 0 ? `${reports} report${reports > 1 ? "s" : ""} to grade` : ""}
                           {reports > 0 && tickets > 0 ? " · " : ""}
-                          {tickets > 0 ? `${tickets} open ticket${tickets > 1 ? "s" : ""}` : ""}
+                          {tickets > 0 ? `${tickets} open quer${tickets > 1 ? "ies" : "y"}` : ""}
                         </span>
                       )}
                     </td>

@@ -64,7 +64,7 @@ const STEPS: ReadonlyArray<{ doodle: DoodleKey; title: string; body: string }> =
   {
     doodle: "globe",
     title: "Report every week",
-    body: "Submit one weekly report for the group. Raise a ticket whenever you are stuck.",
+    body: "Submit one weekly report for the group. Raise a query whenever you are stuck.",
   },
   {
     doodle: "book",

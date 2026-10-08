@@ -30,7 +30,7 @@ export default function NotificationsPage() {
         eyebrow="Notifications"
         title="What's"
         emphasis="new for you."
-        description="Announcements and files from your supervisor and the PBL office, plus updates on your reports, grades and tickets."
+        description="Announcements and files from your supervisor and the PBL office, plus updates on your reports, grades and queries."
         scene="notifications"
         action={
           unreadCount > 0 ? (
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
             <EmptyState
               icon={<BellOff className="size-5" />}
               title="No activity yet"
-              description="Grades, report feedback, ticket replies and mentor decisions appear here."
+              description="Grades, report feedback, query replies and supervisor changes appear here."
             />
           ) : (
             <ul className="divide-y divide-sand-200/70">

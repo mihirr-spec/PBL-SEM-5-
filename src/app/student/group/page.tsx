@@ -28,7 +28,7 @@ const REQUEST_STATUS: Record<RequestStatus, { tone: "gold" | "sage" | "clay" | "
 };
 
 export default function GroupPage() {
-  const { loading, student, group, mentor, refresh } = usePortal();
+  const { loading, student, group, mentor, supervisorChange, refresh } = usePortal();
 
   if (loading || !student) return <PageSkeleton />;
 
@@ -48,7 +48,7 @@ export default function GroupPage() {
         scene="group"
       />
       {group ? (
-        <GroupView group={group} isLeader={isLeader} mentorCard={<MentorCard mentor={mentor} />} onChanged={refresh} />
+        <GroupView group={group} isLeader={isLeader} mentorCard={<MentorCard mentor={mentor} lastChange={supervisorChange} />} onChanged={refresh} />
       ) : (
         <CreateGroupForm onCreated={refresh} myRegistration={student.registrationNumber} />
       )}

@@ -9,7 +9,9 @@ import type {
   Role,
   Student,
   StudentGrade,
+  SupervisorChange,
   Ticket,
+  TicketCategory,
   User,
   WeeklyReport,
 } from "@/lib/types";
@@ -66,6 +68,7 @@ const toFaculty = (r: any): Faculty => ({
   expertise: r.expertise ?? "",
   profileUrl: r.profile_url ?? undefined,
   onPortal: r.user_id != null,
+  maxGroups: r.max_groups ?? 7,
   avatarUrl: r.avatar_url ?? undefined,
 });
 
@@ -137,10 +140,28 @@ const toTicket = (r: any): Ticket => ({
   studentName: r.students?.full_name,
   subject: r.subject,
   body: r.body,
+  category: r.category ?? "general",
   status: r.status,
   reply: r.reply ?? undefined,
   createdAt: r.created_at,
   repliedAt: r.replied_at ?? undefined,
+  forwardedAt: r.forwarded_at ?? undefined,
+  adminReply: r.admin_reply ?? undefined,
+  adminRepliedAt: r.admin_replied_at ?? undefined,
+});
+
+const toSupervisorChange = (r: any): SupervisorChange => ({
+  id: r.id,
+  groupId: r.group_id,
+  groupNumber: r.groups?.number,
+  groupName: r.groups?.name,
+  fromFacultyId: r.from_faculty_id ?? undefined,
+  fromName: r.from?.full_name ?? undefined,
+  toFacultyId: r.to_faculty_id,
+  toName: r.to?.full_name ?? "",
+  reason: r.reason,
+  queryId: r.query_id ?? undefined,
+  createdAt: r.created_at,
 });
 
 const toAnnouncement = (r: any): Announcement => ({
@@ -632,14 +653,77 @@ export async function raiseTicket(input: {
   studentId: string;
   subject: string;
   body: string;
+  category?: TicketCategory;
 }): Promise<void> {
   const { error } = await supabase.from("tickets").insert({
     group_id: input.groupId,
     student_id: input.studentId,
     subject: input.subject,
     body: input.body,
+    category: input.category ?? "general",
+  });
+  if (error?.code === "23505") {
+    throw new Error("Your group already has a change-of-supervisor request in progress.");
+  }
+  fail(error);
+}
+
+/* --------------------------------------------------- supervisor changes */
+
+/** Step 1: the current supervisor approves (sends it to the PBL office) or declines. */
+export async function reviewSupervisorChange(queryId: string, approve: boolean, note: string): Promise<void> {
+  const { error } = await supabase.rpc("review_supervisor_change", {
+    p_query: queryId,
+    p_approve: approve,
+    p_note: note,
   });
   fail(error);
+}
+
+/** The PBL office moves a group to another teacher, optionally closing a request. */
+export async function changeSupervisor(input: {
+  groupId: string;
+  facultyId: string;
+  reason: string;
+  queryId?: string;
+}): Promise<void> {
+  const { error } = await supabase.rpc("change_supervisor", {
+    p_group: input.groupId,
+    p_faculty: input.facultyId,
+    p_reason: input.reason,
+    p_query: input.queryId ?? null,
+  });
+  fail(error);
+}
+
+export async function declineSupervisorChange(queryId: string, note: string): Promise<void> {
+  const { error } = await supabase.rpc("decline_supervisor_change", { p_query: queryId, p_note: note });
+  fail(error);
+}
+
+const CHANGE_SELECT =
+  "*, groups(number, name), from:faculty!supervisor_changes_from_faculty_id_fkey(full_name), to:faculty!supervisor_changes_to_faculty_id_fkey(full_name)";
+
+/** Changes for one group, or (with no group) every change the caller may see. */
+export async function listSupervisorChanges(groupId?: string): Promise<SupervisorChange[]> {
+  let query = supabase.from("supervisor_changes").select(CHANGE_SELECT).order("created_at", { ascending: false });
+  if (groupId) query = query.eq("group_id", groupId);
+  const { data, error } = await query;
+  fail(error);
+  return (data ?? []).map(toSupervisorChange);
+}
+
+/** Teachers with a portal account, each with how many groups they supervise. */
+export async function listPortalTeachers(): Promise<Array<Faculty & { groupCount: number }>> {
+  const [{ data, error }, { data: groups, error: groupError }] = await Promise.all([
+    supabase.from("faculty").select("*").not("user_id", "is", null).order("full_name"),
+    supabase.from("groups").select("mentor_id").not("mentor_id", "is", null),
+  ]);
+  fail(error);
+  fail(groupError);
+  const counts: Record<string, number> = {};
+  for (const g of groups ?? []) counts[g.mentor_id] = (counts[g.mentor_id] ?? 0) + 1;
+  return (data ?? []).map((r: any) => ({ ...toFaculty(r), groupCount: counts[r.id] ?? 0 }));
 }
 
 export async function replyTicket(ticketId: string, reply: string, resolve: boolean): Promise<void> {
@@ -741,7 +825,7 @@ export async function getOverview(): Promise<Overview> {
     count("groups"),
     count("groups", (q) => q.is("mentor_id", null)),
     count("faculty", (q) => q.not("user_id", "is", null)),
-    count("tickets", (q) => q.eq("status", "open")),
+    count("tickets", (q) => q.in("status", ["open", "forwarded"])),
   ]);
   return { students, groups, unassignedGroups, teachersOnPortal, openTickets };
 }

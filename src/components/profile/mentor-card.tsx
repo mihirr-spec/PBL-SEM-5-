@@ -1,13 +1,21 @@
 import Link from "next/link";
-import { BookOpen, Building2, Mail } from "lucide-react";
+import { ArrowRightLeft, BookOpen, Building2, Mail } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, EmptyState } from "@/components/ui/card";
-import type { Faculty } from "@/lib/types";
+import type { Faculty, SupervisorChange } from "@/lib/types";
+import { formatDateTime, timeAgo } from "@/lib/utils";
 
 /** The group's supervisor — or a prompt to request one. */
-export function MentorCard({ mentor }: { mentor: Faculty | null }) {
+export function MentorCard({
+  mentor,
+  lastChange = null,
+}: {
+  mentor: Faculty | null;
+  /** Shown as a notice when the group has moved to this supervisor. */
+  lastChange?: SupervisorChange | null;
+}) {
   if (!mentor) {
     return (
       <Card>
@@ -30,6 +38,21 @@ export function MentorCard({ mentor }: { mentor: Faculty | null }) {
     <Card>
       <CardHeader title="Supervisor" description="Your group's mentor for this semester." />
       <CardBody className="space-y-4">
+        {lastChange && lastChange.toFacultyId === mentor.id ? (
+          <div className="rounded-[12px] border border-azure-100 bg-azure-50/70 px-3 py-2.5 text-[12.5px] text-ink-800">
+            <p className="flex items-center gap-1.5 font-semibold">
+              <ArrowRightLeft className="size-3.5 text-azure-600" />
+              Supervisor changed {lastChange.fromName ? `from ${lastChange.fromName}` : ""}
+            </p>
+            <p className="mt-0.5 text-stone-500" title={formatDateTime(lastChange.createdAt)}>
+              By the PBL office · {timeAgo(lastChange.createdAt)}
+            </p>
+            <p className="mt-1.5 whitespace-pre-line text-stone-600">
+              <span className="font-semibold text-ink-800">Reason: </span>
+              {lastChange.reason}
+            </p>
+          </div>
+        ) : null}
         <div className="flex items-center gap-3.5">
           <Avatar name={mentor.fullName} size="lg" />
           <div className="min-w-0">
@@ -57,8 +80,8 @@ export function MentorCard({ mentor }: { mentor: Faculty | null }) {
           ) : null}
         </ul>
 
-        <Link href="/student/tickets" className="inline-block text-[13px] font-medium text-azure-600 hover:underline">
-          Raise a ticket with your supervisor →
+        <Link href="/student/queries" className="inline-block text-[13px] font-medium text-azure-600 hover:underline">
+          Raise a query with your supervisor →
         </Link>
       </CardBody>
     </Card>

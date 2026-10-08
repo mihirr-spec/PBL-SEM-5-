@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Award, Bell, FileText, LifeBuoy, UsersRound } from "lucide-react";
+import { ArrowUpRight, Award, Bell, FileText, MessageCircleQuestion, UsersRound } from "lucide-react";
 
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { MentorCard } from "@/components/profile/mentor-card";
@@ -23,7 +23,7 @@ function greeting(fullName: string) {
 }
 
 export default function DashboardPage() {
-  const { loading, student, group, mentor, notifications } = usePortal();
+  const { loading, student, group, mentor, supervisorChange, notifications } = usePortal();
 
   const { data } = useLoad(
     async () => {
@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const hello = greeting(student.fullName);
   const latestReport = data?.reports[0];
   const openTickets = data?.tickets.filter((t) => t.status === "open").length ?? 0;
-  // Reports and tickets need a group; until then those cards point to it.
+  // Reports and queries need a group; until then those cards point to it.
   const groupHref = (href: string) => (group ? href : "/student/group");
 
   return (
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* ------------------------- 5. supervisor -------------------------- */}
-        <MentorCard mentor={mentor} />
+        <MentorCard mentor={mentor} lastChange={supervisorChange} />
 
         {/* ------------------------- 2. weekly report ------------------------ */}
         <Card>
@@ -169,18 +169,18 @@ export default function DashboardPage() {
           )}
         </Card>
 
-        {/* ----------------------------- 4. tickets ----------------------------- */}
+        {/* ----------------------------- 4. queries ----------------------------- */}
         <Card>
-          <CardHeader title="Tickets" />
+          <CardHeader title="Queries" />
           <CardBody className="space-y-3">
             <p className="text-[13px] text-stone-600">
               {openTickets > 0
-                ? `${openTickets} open ${openTickets === 1 ? "ticket" : "tickets"} with your supervisor.`
-                : "Need help or have a problem? Raise a ticket — your supervisor sees it straight away."}
+                ? `${openTickets} open ${openTickets === 1 ? "query" : "queries"} with your supervisor.`
+                : "Need help or have a problem? Raise a query — your supervisor sees it straight away."}
             </p>
-            <ButtonLink href={groupHref("/student/tickets")} size="sm" variant="secondary">
-              <LifeBuoy className="size-3.5" />
-              Raise a ticket
+            <ButtonLink href={groupHref("/student/queries")} size="sm" variant="secondary">
+              <MessageCircleQuestion className="size-3.5" />
+              Raise a query
             </ButtonLink>
           </CardBody>
         </Card>
